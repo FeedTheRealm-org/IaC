@@ -46,3 +46,12 @@ The current resources created by terraform are (4):
 
 Externally created resources (1):
 - S3 bucket (feedtherealm-terraform-state)
+
+## References
+
+Some useful links..
+
+- [Terraform for AWS docs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
+- [General terraform docs](https://developer.hashicorp.com/terraform/docs)
+- [AWS cli docs](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html)
+- [AWS github actions](https://github.com/orgs/aws-actions/repositories?type=all) + [ODIC](https://docs.github.com/en/actions/reference/security/oidc#methods-for-requesting-the-oidc-token) + [GH Thumbprint](https://github.blog/changelog/2023-06-27-github-actions-update-on-oidc-integration-with-aws/)
