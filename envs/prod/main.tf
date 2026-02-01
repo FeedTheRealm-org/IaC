@@ -18,7 +18,7 @@ module "core_service_ci_role" {
   oidc_provider_arn  = module.github_oidc.arn
   ecr_repository_arn = module.core_service_ecr.repository_arn
 
-  github_org    = "feedtherealm-org"
+  github_org    = "FeedTheRealm-org"
   github_repo   = "core-service"
   github_branch = "main"
 }
