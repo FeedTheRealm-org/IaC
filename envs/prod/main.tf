@@ -42,12 +42,19 @@ module "http_sg" {
   name   = "http-only"
 }
 
+module "ssh_sg" {
+  source = "../../modules/security_group_ssh"
+
+  name   = "ssh-only"
+}
+
 module "ec2" {
   source = "../../modules/ec2"
 
   instance_type         = "t3.micro"
+  ssh_key_name = var.ssh_key_name
   instance_profile_name = module.ec2_role.instance_profile_name
-  security_group_ids    = [module.http_sg.id]
+  security_group_ids    = [module.http_sg.id, module.ssh_sg.id]
 
   tags = {
     Name = "core-runner"

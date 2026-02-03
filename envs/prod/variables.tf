@@ -39,3 +39,7 @@ variable "database_url" {
   sensitive = true
 }
 
+variable "ssh_key_name" {
+  type        = string
+  sensitive = true
+}

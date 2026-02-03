@@ -62,8 +62,9 @@ The current resources created by terraform are the following:
 ### SSM Parameters (9)
 - core-service environment variables (9 variables)
 
-### Security groups (1)
+### Security groups (2)
 - aws_security_group (http-only group)
+- aws_security_group (ssh-only group)
 
 ### ECR (1)
 - aws_ecr_repository (core service)

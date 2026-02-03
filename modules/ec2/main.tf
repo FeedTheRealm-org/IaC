@@ -5,6 +5,7 @@ data "aws_ssm_parameter" "al2023" {
 resource "aws_instance" "this" {
   ami           = data.aws_ssm_parameter.al2023.value
   instance_type = var.instance_type
+  key_name = var.ssh_key_name
 
   iam_instance_profile = var.instance_profile_name
   vpc_security_group_ids = var.security_group_ids
