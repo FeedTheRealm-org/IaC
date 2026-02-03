@@ -13,8 +13,12 @@ resource "aws_instance" "this" {
   user_data = <<-EOF
     #!/bin/bash
     yum install -y docker
+
     systemctl enable docker
     systemctl start docker
+
+    sudo usermod -aG docker ec2-user
+    newgrp docker
   EOF
 
   tags = var.tags
