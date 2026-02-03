@@ -18,4 +18,11 @@ aws s3api put-bucket-encryption --bucket feedtherealm-terraform-state --server-s
       }\
     }]\
   }' --profile iamadmin
+
+# Secure bucket
+aws s3api put-public-access-block \
+  --bucket feedtherealm-terraform-state \
+  --public-access-block-configuration \
+  BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true \
+  --profile iamadmin
 ```
