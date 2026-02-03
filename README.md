@@ -85,5 +85,4 @@ Some useful links..
 - [General terraform docs](https://developer.hashicorp.com/terraform/docs)
 - [AWS cli docs](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html)
 - [AWS github actions](https://github.com/orgs/aws-actions/repositories?type=all) + [OIDC](https://docs.github.com/en/actions/reference/security/oidc#methods-for-requesting-the-oidc-token) + [GH Thumbprint](https://github.blog/changelog/2023-06-27-github-actions-update-on-oidc-integration-with-aws/)
-
-
+- [AWS general docs](https://docs.aws.amazon.com/)
