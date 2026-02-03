@@ -43,9 +43,13 @@ so **please let the whole team know before applying a infrastructural change!**
 The current resources created by terraform are the following:
 
 ### IAM roles + policies (6)
+
+#### gh ecr pusher roles
+
 - aws_iam_role (AssumeRoleWithWebIdentity for feedtherealm-org/core-service)
 - aws_iam_role_policy (ecr push)
 
+#### ec2 roles
 
 - aws_iam_role (ec2 role)
 - aws_iam_role_policy (ssm read)
@@ -71,7 +75,7 @@ The current resources created by terraform are the following:
 The externally created resources are (1) the following:
 - S3 bucket (feedtherealm-terraform-state)
 
-[[More Info >]](./docs/external-commands.md)
+[[More Info >]](./docs/external-commands.md) (cli commands history)
 
 ## References
 
