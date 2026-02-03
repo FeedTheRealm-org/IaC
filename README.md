@@ -64,7 +64,7 @@ The current resources created by terraform are the following:
 
 ### Security groups (2)
 - aws_security_group (http-only group)
-- aws_security_group (ssh-only group)
+- aws_security_group (ssh-only group) 🚩 Only active when debbuging, otherwise its removed from resources.
 
 ### ECR (1)
 - aws_ecr_repository (core service)

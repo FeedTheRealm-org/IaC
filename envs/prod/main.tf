@@ -56,7 +56,7 @@ module "ec2" {
   instance_type         = "t3.micro"
   ssh_key_name = var.ssh_key_name
   instance_profile_name = module.ec2_role.instance_profile_name
-  security_group_ids    = [module.http_sg.id, module.ssh_sg.id]
+  security_group_ids    = [module.http_sg.id] # Add `module.ssh_sg.id` if activating SSH for debugging!
 
   tags = {
     Name = "core-runner"
