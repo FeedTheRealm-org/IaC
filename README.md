@@ -48,6 +48,7 @@ The current resources created by terraform are the following:
 
 - aws_iam_role (AssumeRoleWithWebIdentity for feedtherealm-org/core-service)
 - aws_iam_role_policy (ecr push)
+- aws_iam_role_policy (ssm deploy)
 
 #### > ec2 roles
 
