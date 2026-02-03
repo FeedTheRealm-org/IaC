@@ -45,7 +45,6 @@ resource "aws_iam_role_policy" "ecr_push" {
   })
 }
 
-
 resource "aws_iam_role_policy" "ssm_deploy" {
   role = aws_iam_role.this.id
 
@@ -58,7 +57,10 @@ resource "aws_iam_role_policy" "ssm_deploy" {
           "ssm:SendCommand",
           "ssm:GetCommandInvocation"
         ]
-        Resource = "*"
+        Resource = [
+          "arn:aws:ssm:us-east-2:*:document/AWS-RunShellScript",
+          "arn:aws:ec2:us-east-2:*:instance/*"
+        ]
       },
       {
         Effect = "Allow"
