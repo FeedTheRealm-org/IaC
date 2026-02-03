@@ -50,7 +50,7 @@ module "ec2" {
   security_group_ids    = [module.http_sg.id]
 
   tags = {
-    Name = "shared-ec2-runner"
+    Name = "core-runner"
   }
 }
 
