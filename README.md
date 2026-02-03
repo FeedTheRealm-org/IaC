@@ -44,7 +44,7 @@ The current resources created by terraform are (4):
 - aws_iam_role (AssumeRoleWithWebIdentity for feedtherealm-org/core-service)
 - aws_iam_role_policy (ecr push)
 
-Externally created resources (1):
+Externally created resources (1) [[More Info >]](./docs/external-commands.md):
 - S3 bucket (feedtherealm-terraform-state)
 
 ## References
