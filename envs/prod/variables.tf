@@ -40,6 +40,8 @@ variable "database_url" {
 }
 
 variable "ssh_key_name" {
+  description = "SSH Key name - Only use ssh for debuggin purposes and then deactivate it in main.tf"
   type        = string
+  default = ""
   sensitive = true
 }

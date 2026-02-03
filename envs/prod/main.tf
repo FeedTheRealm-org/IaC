@@ -42,11 +42,13 @@ module "http_sg" {
   name   = "http-only"
 }
 
-module "ssh_sg" {
-  source = "../../modules/security_group_ssh"
+# ONLY uncomment for debugging and comment out again after
+# as this will make the ec2 open for ssh connections from anywhere.
+# module "ssh_sg" {
+#   source = "../../modules/security_group_ssh"
 
-  name   = "ssh-only"
-}
+#   name   = "ssh-only"
+# }
 
 module "ec2" {
   source = "../../modules/ec2"
