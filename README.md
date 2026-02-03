@@ -38,14 +38,40 @@ so **please let the whole team know before applying a infrastructural change!**
 
 ## Resources
 
-The current resources created by terraform are (4):
-- aws_ecr_repository (core service)
-- aws_iam_openid_connect_provider (github)
+⚠️ **Keep this up to date after any change!**
+
+The current resources created by terraform are the following:
+
+### IAM roles + policies (6)
 - aws_iam_role (AssumeRoleWithWebIdentity for feedtherealm-org/core-service)
 - aws_iam_role_policy (ecr push)
 
-Externally created resources (1) [[More Info >]](./docs/external-commands.md):
+
+- aws_iam_role (ec2 role)
+- aws_iam_role_policy (ssm read)
+- 2 x aws_iam_role_policy_attachment (ecr pull and ssm managed)
+
+### OIDC providers (1)
+- aws_iam_openid_connect_provider (github)
+
+### SSM Parameters (9)
+- core-service environment variables (9 variables)
+
+### Security groups (1)
+- aws_security_group (http-only group)
+
+### ECR (1)
+- aws_ecr_repository (core service)
+
+### EC2 (1)
+- aws_instance
+
+## External Resources
+
+The externally created resources are (1) the following:
 - S3 bucket (feedtherealm-terraform-state)
+
+[[More Info >]](./docs/external-commands.md)
 
 ## References
 
