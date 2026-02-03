@@ -65,7 +65,7 @@ resource "aws_iam_role_policy" "ssm_deploy" {
       {
         Effect = "Allow"
         Action = [
-          "ec2:DescribeInstances"
+          "resourcegroupstaggingapi:GetResources"
         ]
         Resource = "*"
       }
