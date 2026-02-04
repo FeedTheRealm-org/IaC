@@ -17,21 +17,23 @@ aws sts get-caller-identity --profile <name>
 
 ## Terraform commands
 
-You need to initialize the terraform files and to connect to the backend (in S3).
+<!-- I (human) put those emojis dont delete them they make it easier to read -->
+
+▶️ You need to initialize the terraform files and to connect to the backend (in S3).
 This command should be ran once at the start and then once per change to the modules.
 
 ```bash
 AWS_PROFILE=<name> terraform init [-reconfigure] # reconfigure if unsure if connected to backend
 ```
 
-Then you can plan the changes for the infrastructure to reflect specified changes in definitions.
+📝 Then you can plan the changes for the infrastructure to reflect specified changes in definitions.
 
 ```bash
 AWS_PROFILE=<name> terraform plan
 # See the diff of current state and new desired state (none if no changes where made)
 ```
 
-After revising the infrastructure and if you want to commit to it, apply the changes (do so having in mind it could create/modify/destroy resources).
+✅ After revising the infrastructure and if you want to commit to it, apply the changes (do so having in mind it could create/modify/destroy resources).
 
 ```bash
 AWS_PROFILE=<name> terraform apply
@@ -39,10 +41,16 @@ AWS_PROFILE=<name> terraform apply
 # At the end prompts for the final decision (type yes to proceed)
 ```
 
-Done with the infra? might as well blow it up...
+❌ Done with the infra? might as well blow it up...
 
 ```bash
 AWS_PROFILE=<name> terraform destroy # DONT DO IT!
+```
+
+⟳ One extra command is used to attempt to find any resources held in the state file and update with any drift that has happened in the provider outside of Terraform since it was last ran.
+
+```bash
+AWS_PROFILE=<name> terraform refresh
 ```
 
 ## Environments & Environment variables
