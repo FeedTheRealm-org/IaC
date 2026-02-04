@@ -2,6 +2,10 @@ variable "server_environment" {
   type = string
 }
 
+variable "db_should_migrate" {
+  type = string
+}
+
 variable "email_sender_address" {
   type = string
 }

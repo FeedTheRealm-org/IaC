@@ -60,8 +60,8 @@ The current resources created by terraform are the following:
 ### OIDC providers (1)
 - aws_iam_openid_connect_provider (github)
 
-### SSM Parameters (9)
-- core-service environment variables (9 variables)
+### SSM Parameters (10)
+- core-service environment variables (10 variables)
 
 ### Security groups (2)
 - aws_security_group (http-only group)

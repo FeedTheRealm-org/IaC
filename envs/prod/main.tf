@@ -74,6 +74,11 @@ module "core_service_params" {
       type  = "String"
     }
 
+    "/core-service/DB_SHOULD_MIGRATE" = {
+      value = var.db_should_migrate
+      type  = "String"
+    }
+
     "/core-service/EMAIL_SENDER_ADDRESS" = {
       value = var.email_sender_address
       type  = "String"
