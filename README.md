@@ -2,6 +2,7 @@
 
 This repository declares as code the state of the current AWS infrastructure of the project.
 
+[[How to use >]](./docs/how-to-use.md)
 
 ## Structure
 
