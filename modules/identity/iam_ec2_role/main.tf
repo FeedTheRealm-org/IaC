@@ -40,6 +40,25 @@ resource "aws_iam_role_policy" "ssm_read" {
   })
 }
 
+resource "aws_iam_role_policy" "s3_upload" {
+  role = aws_iam_role.this.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+
+      Actions = [
+        "s3:PutObject",
+        "s3:AbortMultipartUpload"
+      ]
+
+      Resources = [
+        for bucket_arn in var.upload_buckets : "${bucket_arn}/*"
+      ]
+    }]
+  })
+}
+
 resource "aws_iam_instance_profile" "this" {
   name = var.name
   role = aws_iam_role.this.name

@@ -27,6 +27,17 @@ module "core_service_ci_role" {
   github_branch = "main"
 }
 
+/* --- S3 Creation --- */
+
+module "s3_buckets" {
+  for_each = var.buckets
+
+  source = "../../modules/bucket"
+
+  bucket_name = each.value.name
+  tags        = each.value.tags
+}
+
 /* --- EC2 Creation --- */
 
 module "ec2_role" {
@@ -34,6 +45,9 @@ module "ec2_role" {
 
   name               = "generic-ec2-role"
   ssm_parameter_path = "/core-service/*"
+  upload_buckets = [
+    for m in module.s3_buckets : m.bucket_arn
+  ]
 }
 
 module "http_sg" {

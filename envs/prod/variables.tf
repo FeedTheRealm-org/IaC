@@ -1,3 +1,12 @@
+/* Module Instantiation */
+variable "buckets" {
+  type = map(object({
+    name = string
+    tags = map(string)
+  }))
+}
+
+/* Parameters */
 variable "server_environment" {
   type = string
 }
@@ -46,6 +55,6 @@ variable "database_url" {
 variable "ssh_key_name" {
   description = "SSH Key name - Only use ssh for debuggin purposes and then deactivate it in main.tf"
   type        = string
-  default = ""
-  sensitive = true
+  default     = ""
+  sensitive   = true
 }

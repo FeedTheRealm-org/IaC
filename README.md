@@ -44,35 +44,60 @@ so **please let the whole team know before applying a infrastructural change!**
 
 The current resources created by terraform are the following:
 
-### IAM roles + policies (7)
+### IAM roles + policies (8)
 
-#### > gh ecr pusher roles
+#### > GitHub ECR pusher roles
 
 - aws_iam_role (AssumeRoleWithWebIdentity for feedtherealm-org/core-service)
 - aws_iam_role_policy (ecr push)
 - aws_iam_role_policy (ssm deploy)
 
-#### > ec2 roles
+#### > EC2 roles
 
 - aws_iam_role (ec2 role)
 - aws_iam_role_policy (ssm read)
-- 2 x aws_iam_role_policy_attachment (ecr pull and ssm managed)
+- aws_iam_role_policy (s3 upload) ✅
+- 2 × aws_iam_role_policy_attachment (ecr pull, ssm managed)
+
+---
 
 ### OIDC providers (1)
 - aws_iam_openid_connect_provider (github)
 
+---
+
 ### SSM Parameters (10)
 - core-service environment variables (10 variables)
 
+---
+
 ### Security groups (2)
 - aws_security_group (http-only group)
-- aws_security_group (ssh-only group) 🚩 Only active when debbuging, otherwise its removed from resources.
+- aws_security_group (ssh-only group) 🚩 Only active when debugging, otherwise removed
+
+---
 
 ### ECR (1)
 - aws_ecr_repository (core service)
 
+---
+
 ### EC2 (1)
-- aws_instance
+- aws_instance (core service)
+
+---
+
+### S3 + CloudFront (2 buckets)
+
+For each bucket:
+- aws_s3_bucket
+- aws_s3_bucket_policy (CloudFront-only read)
+- aws_cloudfront_distribution
+- aws_cloudfront_origin_access_control
+
+Buckets:
+- cosmetics
+- worlds
 
 ## External Resources
 
