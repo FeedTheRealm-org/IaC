@@ -5,18 +5,18 @@ provider "aws" {
 /* --- ECR Creation --- */
 
 module "core_service_ecr" {
-  source = "../../modules/ecr"
+  source = "../../modules/container_registry"
   name   = "core-service"
 }
 
 /* --- GitHub Access ---  */
 
 module "github_oidc" {
-  source = "../../modules/github_oidc"
+  source = "../../modules/identity/iam_github_oidc/"
 }
 
 module "core_service_ci_role" {
-  source = "../../modules/iam_github_actions_role"
+  source = "../../modules/identity/iam_github_actions_role"
 
   name               = "github-actions-core-service"
   oidc_provider_arn  = module.github_oidc.arn
@@ -30,16 +30,16 @@ module "core_service_ci_role" {
 /* --- EC2 Creation --- */
 
 module "ec2_role" {
-  source = "../../modules/iam_ec2_role"
+  source = "../../modules/identity/iam_ec2_role"
 
-  name   = "generic-ec2-role"
+  name               = "generic-ec2-role"
   ssm_parameter_path = "/core-service/*"
 }
 
 module "http_sg" {
-  source = "../../modules/security_group_http"
+  source = "../../modules/networking/firewall_http"
 
-  name   = "http-only"
+  name = "http-only"
 }
 
 # ONLY uncomment for debugging and comment out again after
@@ -51,10 +51,10 @@ module "http_sg" {
 # }
 
 module "ec2" {
-  source = "../../modules/ec2"
+  source = "../../modules/compute"
 
   instance_type         = "t3.micro"
-  ssh_key_name = var.ssh_key_name
+  ssh_key_name          = var.ssh_key_name
   instance_profile_name = module.ec2_role.instance_profile_name
   security_group_ids    = [module.http_sg.id] # Add `module.ssh_sg.id` if activating SSH for debugging!
 
@@ -66,7 +66,7 @@ module "ec2" {
 /* SSM Parameters */
 
 module "core_service_params" {
-  source = "../../modules/ssm_parameters"
+  source = "../../modules/parameter_store/ssm_parameters"
 
   parameters = {
     "/core-service/SERVER_ENVIRONMENT" = {
