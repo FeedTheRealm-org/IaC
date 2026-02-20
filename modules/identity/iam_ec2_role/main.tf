@@ -47,12 +47,12 @@ resource "aws_iam_role_policy" "s3_upload" {
     Statement = [{
       Effect = "Allow"
 
-      Actions = [
+      Action = [
         "s3:PutObject",
         "s3:AbortMultipartUpload"
       ]
 
-      Resources = [
+      Resource = [
         for bucket_arn in var.upload_buckets : "${bucket_arn}/*"
       ]
     }]

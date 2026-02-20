@@ -1,11 +1,11 @@
 # Module Instantiation
 buckets = {
   cosmetics = {
-    name = "cosmetics"
+    name = "feedtherealm-prod-cosmetics"
     tags = { purpose = "cosmetics" }
   }
   worlds = {
-    name = "worlds"
+    name = "feedtherealm-prod-worlds"
     tags = { purpose = "worlds" }
   }
 }
