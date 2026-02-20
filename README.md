@@ -22,12 +22,13 @@ the state changes. Additionally there is a `backend.tf` file which declares wher
 │       ├── main.tf
 │       └── outputs.tf
 ├── modules/
-│   ├── ecr/
+│   ├── compute/
 │   │   ├── main.tf
 │   │   ├── outputs.tf
 │   │   └── variables.tf
-│   ├── github_oidc/
-│   └── iam_github_actions_role/
+│   ├── container_registry/
+│   └── identity/
+├── ...
 ```
 
 ## Backend
