@@ -3,8 +3,8 @@ resource "aws_security_group" "this" {
   description = "Allow HTTP only"
 
   ingress {
-    from_port   = 80
-    to_port     = 80
+    from_port   = 34782
+    to_port     = 34782
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
