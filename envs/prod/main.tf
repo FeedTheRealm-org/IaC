@@ -56,13 +56,11 @@ module "http_sg" {
   name = "http-only"
 }
 
-# ONLY uncomment for debugging and comment out again after
-# as this will make the ec2 open for ssh connections from anywhere.
-# module "ssh_sg" {
-#   source = "../../modules/security_group_ssh"
+module "ssh_sg" {
+  source = "../../modules/networking/firewall_ssh"
 
-#   name   = "ssh-only"
-# }
+  name = "ssh-firewall"
+}
 
 module "ec2" {
   source = "../../modules/compute"
@@ -70,7 +68,7 @@ module "ec2" {
   instance_type         = "t3.micro"
   ssh_key_name          = var.ssh_key_name
   instance_profile_name = module.ec2_role.instance_profile_name
-  security_group_ids    = [module.http_sg.id] # Add `module.ssh_sg.id` if activating SSH for debugging!
+  security_group_ids    = [module.http_sg.id, module.ssh_sg.id] # Only add `module.ssh_sg.id` if activating SSH for debugging!
 
   tags = {
     Name = "core-runner"
