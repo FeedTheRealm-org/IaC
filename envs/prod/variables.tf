@@ -6,7 +6,7 @@ variable "buckets" {
   }))
 }
 
-/* Parameters */
+/* CORE-SERVICE Parameters */
 variable "server_environment" {
   type = string
 }
@@ -50,6 +50,12 @@ variable "database_ssl_cert_path" {
 variable "database_url" {
   type      = string
   sensitive = true
+}
+
+/* FTR-SERVER Parameters */
+
+variable "ftr_core_service_url" {
+  type = string
 }
 
 variable "ssh_key_name" {

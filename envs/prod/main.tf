@@ -79,6 +79,12 @@ module "ssh_sg" {
   name = "ssh-firewall"
 }
 
+module "ftr_server_sg" {
+  source = "../../modules/networking/firewall_udp_game"
+
+  name = "ftr-server-udp"
+}
+
 module "ec2" {
   source = "../../modules/compute"
 
@@ -86,7 +92,7 @@ module "ec2" {
   instance_type         = "t3.micro"
   ssh_key_name          = var.ssh_key_name
   instance_profile_name = module.ec2_role.instance_profile_name
-  security_group_ids    = [module.http_sg.id] # Only add `module.ssh_sg.id` if activating SSH for debugging!
+  security_group_ids    = [module.http_sg.id, module.ftr_server_sg.id] # Only add `module.ssh_sg.id` if activating SSH for debugging!
 
   tags = {
     Name = "core-runner"
@@ -147,6 +153,17 @@ module "core_service_params" {
     "/core-service/DATABASE_URL" = {
       value = var.database_url
       type  = "SecureString"
+    }
+  }
+}
+
+module "ftr_server_params" {
+  source = "../../modules/parameter_store/ssm_parameters"
+
+  parameters = {
+    "/ftr-server/CORE_SERVICE_URL" = {
+      value = var.ftr_core_service_url
+      type  = "String"
     }
   }
 }
