@@ -9,6 +9,11 @@ module "core_service_ecr" {
   name   = "core-service"
 }
 
+module "ftr_server_ecr" {
+  source = "../../modules/container_registry"
+  name   = "ftr-server"
+}
+
 /* --- GitHub Access ---  */
 
 module "github_oidc" {
@@ -24,6 +29,18 @@ module "core_service_ci_role" {
 
   github_org    = "FeedTheRealm-org"
   github_repo   = "core-service"
+  github_branch = "main"
+}
+
+module "ftr_server_ci_role" {
+  source = "../../modules/identity/iam_github_actions_role"
+
+  name               = "github-actions-ftr-server"
+  oidc_provider_arn  = module.github_oidc.arn
+  ecr_repository_arn = module.ftr_server_ecr.repository_arn
+
+  github_org    = "FeedTheRealm-org"
+  github_repo   = "game"
   github_branch = "main"
 }
 
