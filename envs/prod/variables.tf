@@ -58,3 +58,8 @@ variable "ssh_key_name" {
   default     = ""
   sensitive   = true
 }
+
+variable "ami" {
+  description = "EC2 AMI ID. Find the latest Amazon Linux 2023 AMI with: aws ssm get-parameter --name /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64 --query Parameter.Value --output text"
+  type        = string
+}

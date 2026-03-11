@@ -65,6 +65,7 @@ module "ssh_sg" {
 module "ec2" {
   source = "../../modules/compute"
 
+  ami                   = var.ami
   instance_type         = "t3.micro"
   ssh_key_name          = var.ssh_key_name
   instance_profile_name = module.ec2_role.instance_profile_name
