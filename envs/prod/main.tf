@@ -96,7 +96,7 @@ module "ec2" {
   instance_type         = "t3.micro"
   ssh_key_name          = var.ssh_key_name
   instance_profile_name = module.ec2_role.instance_profile_name
-  security_group_ids    = [module.http_sg.id, module.ftr_server_sg.id, module.ssh_sg.id] # Only add `module.ssh_sg.id` if activating SSH for debugging!
+  security_group_ids    = [module.http_sg.id, module.ftr_server_sg.id] # Only add `module.ssh_sg.id` if activating SSH for debugging!
   environment = var.environment
 
   tags = {
