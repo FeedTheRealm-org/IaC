@@ -6,10 +6,11 @@ variable "buckets" {
   }))
 }
 
-/* CORE-SERVICE Parameters */
-variable "server_environment" {
+variable "environment" {
   type = string
 }
+
+/* CORE-SERVICE Parameters */
 
 variable "db_should_migrate" {
   type = string
@@ -56,6 +57,13 @@ variable "database_url" {
 
 variable "ftr_core_service_url" {
   type = string
+}
+
+/* MONITORING Parameters */
+
+variable "dd_api_key" {
+  type      = string
+  sensitive = true
 }
 
 variable "ssh_key_name" {

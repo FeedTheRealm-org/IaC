@@ -61,7 +61,11 @@ module "ec2_role" {
   source = "../../modules/identity/iam_ec2_role"
 
   name               = "generic-ec2-role"
-  ssm_parameter_path = "/core-service/*"
+  ssm_parameter_paths = [
+    "/core-service/*",
+    "/ftr-server/*",
+    "/monitoring/*"
+  ]
   upload_buckets = [
     for m in module.s3_buckets : m.bucket_arn
   ]
@@ -92,7 +96,8 @@ module "ec2" {
   instance_type         = "t3.micro"
   ssh_key_name          = var.ssh_key_name
   instance_profile_name = module.ec2_role.instance_profile_name
-  security_group_ids    = [module.http_sg.id, module.ftr_server_sg.id] # Only add `module.ssh_sg.id` if activating SSH for debugging!
+  security_group_ids    = [module.http_sg.id, module.ftr_server_sg.id, module.ssh_sg.id] # Only add `module.ssh_sg.id` if activating SSH for debugging!
+  environment = var.environment
 
   tags = {
     Name = "core-runner"
@@ -106,7 +111,7 @@ module "core_service_params" {
 
   parameters = {
     "/core-service/SERVER_ENVIRONMENT" = {
-      value = var.server_environment
+      value = var.environment
       type  = "String"
     }
 
@@ -164,6 +169,17 @@ module "ftr_server_params" {
     "/ftr-server/CORE_SERVICE_URL" = {
       value = var.ftr_core_service_url
       type  = "String"
+    }
+  }
+}
+
+module "monitoring_params" {
+  source = "../../modules/parameter_store/ssm_parameters"
+
+  parameters = {
+    "/monitoring/dd_api_key" = {
+      value = var.dd_api_key
+      type  = "SecureString"
     }
   }
 }

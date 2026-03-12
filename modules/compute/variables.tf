@@ -28,3 +28,8 @@ variable "ssh_key_name" {
   description = "SSH key-pair name"
   type        = string
 }
+
+variable "environment" {
+  description = "Instance runtinme environment"
+  type = string
+}
