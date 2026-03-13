@@ -14,14 +14,14 @@ variable "ecr_repository_arn" {
 }
 
 variable "github_org" {
-  type        = string
+  type = string
 }
 
 variable "github_repo" {
-  type        = string
+  type = string
 }
 
 variable "github_branch" {
-  type        = string
+  type = string
 }
 
