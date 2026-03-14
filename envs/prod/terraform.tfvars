@@ -34,9 +34,5 @@ nomad_client_nodes = {
     enable_udp_game_traffic = true
   }
 }
-nomad_datacenter          = "dc1"
-nomad_region              = "global"
 nomad_version             = "1.11.3"
-nomad_acl_enabled         = true
 enable_datadog            = true
-nomad_allowed_cidr_blocks = []

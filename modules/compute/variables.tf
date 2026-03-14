@@ -56,4 +56,5 @@ variable "nomad_bootstrap_expect" {
 variable "nomad_server_private_ips" {
   description = "Nomad server private IPs used by clients"
   type        = list(string)
+  default     = []
 }

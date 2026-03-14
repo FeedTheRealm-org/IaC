@@ -30,5 +30,5 @@ output "nomad_client_private_ips" {
 }
 
 output "nomad_internal_api" {
-  value = "https://${module.core_nomad_server.private_ip}:4646"
+  value = "http://${module.core_nomad_server.private_ip}:4646"
 }

@@ -64,8 +64,7 @@ module "ec2_role" {
   ssm_parameter_paths = [
     "/core-service/*",
     "/ftr-server/*",
-    "/monitoring/*",
-    "/nomad/*"
+    "/monitoring/*"
   ]
   upload_buckets = [
     for m in module.s3_buckets : m.bucket_arn
@@ -126,11 +125,14 @@ module "nomad_clients" {
   instance_type            = each.value.instance_type
   ssh_key_name             = var.ssh_key_name
   instance_profile_name    = module.ec2_role.instance_profile_name
-  security_group_ids       = [module.nomad_sg.id, module.ftr_server_sg.id] # Add `module.ssh_sg.id` only for debugging.
+  security_group_ids = concat(
+    [module.nomad_sg.id],
+    each.value.enable_udp_game_traffic ? [module.ftr_server_sg.id] : []
+  ) # Add `module.ssh_sg.id` only for debugging.
   environment              = var.environment
   aws_region               = var.aws_region
   nomad_version            = var.nomad_version
-  node_role                = "client"
+  nomad_role               = "client"
   nomad_server_private_ips = [module.core_nomad_server.private_ip]
 
   tags = {
@@ -223,44 +225,9 @@ module "nomad_params" {
   source = "../../modules/parameter_store/ssm_parameters"
 
   parameters = {
-    "/nomad/gossip/key" = {
-      value = var.nomad_gossip_key
-      type  = "SecureString"
-    }
-
-    "/nomad/tls/ca_pem" = {
-      value = var.nomad_tls_ca_pem
-      type  = "SecureString"
-    }
-
-    "/nomad/tls/cert_pem" = {
-      value = var.nomad_tls_cert_pem
-      type  = "SecureString"
-    }
-
-    "/nomad/tls/key_pem" = {
-      value = var.nomad_tls_key_pem
-      type  = "SecureString"
-    }
-
-    "/nomad/tokens/agent" = {
-      value = var.nomad_agent_token
-      type  = "SecureString"
-    }
-
     "/core-service/NOMAD_ADDR" = {
-      value = "https://${module.core_nomad_server.private_ip}:4646"
+      value = "http://${module.core_nomad_server.private_ip}:4646"
       type  = "String"
-    }
-
-    "/core-service/NOMAD_TOKEN" = {
-      value = var.nomad_core_service_token
-      type  = "SecureString"
-    }
-
-    "/core-service/NOMAD_TLS_CACERT" = {
-      value = var.nomad_tls_ca_pem
-      type  = "SecureString"
     }
   }
 }
