@@ -6,10 +6,10 @@ resource "aws_security_group" "nomad" {
 
   # Nomad API
   ingress {
-    description = "Nomad HTTP API"
-    from_port   = 4646
-    to_port     = 4646
-    protocol    = "tcp"
+    description     = "Nomad HTTP API"
+    from_port       = 4646
+    to_port         = 4646
+    protocol        = "tcp"
     security_groups = var.allowed_security_group_ids
   }
 
