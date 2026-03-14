@@ -21,7 +21,7 @@ ami                    = "ami-0b0b78dcacbab728f" # Amazon Linux 2023 with kernel
 
 # Nomad cluster topology defaults
 aws_region                      = "us-east-2"
-core_nomad_server_instance_type = "t3.small"
+core_nomad_server_instance_type = "t3.micro"
 nomad_client_nodes = {
   nomad-client-a = {
     name                    = "nomad-client-a"

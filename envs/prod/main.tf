@@ -200,6 +200,11 @@ module "core_service_params" {
       value = var.database_url
       type  = "SecureString"
     }
+
+    "/core-service/FTR_SERVER_IMAGE" = {
+      value = "${module.ftr_server_ecr.repository_url}:latest"
+      type  = "String"
+    }
   }
 }
 
