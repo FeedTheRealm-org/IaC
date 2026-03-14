@@ -99,11 +99,13 @@ module "nomad_sg" {
 module "core_nomad_server" {
   source = "../../modules/compute"
 
+  depends_on = [module.monitoring_params]
+
   ami                    = var.ami
   instance_type          = var.core_nomad_server_instance_type
   ssh_key_name           = var.ssh_key_name
   instance_profile_name  = module.ec2_role.instance_profile_name
-  security_group_ids     = [module.http_sg.id, module.nomad_sg.id] # Add `module.ssh_sg.id` only for debugging.
+  security_group_ids     = [module.http_sg.id, module.nomad_sg.id, module.ssh_sg.id] # Add `module.ssh_sg.id` only for debugging.
   environment            = var.environment
   aws_region             = var.aws_region
   nomad_version          = var.nomad_version
@@ -121,12 +123,14 @@ module "nomad_clients" {
 
   source = "../../modules/compute"
 
-  ami                      = var.ami
-  instance_type            = each.value.instance_type
-  ssh_key_name             = var.ssh_key_name
-  instance_profile_name    = module.ec2_role.instance_profile_name
+  depends_on = [module.monitoring_params, module.core_nomad_server]
+
+  ami                   = var.ami
+  instance_type         = each.value.instance_type
+  ssh_key_name          = var.ssh_key_name
+  instance_profile_name = module.ec2_role.instance_profile_name
   security_group_ids = concat(
-    [module.nomad_sg.id],
+    [module.nomad_sg.id, module.ssh_sg.id],
     each.value.enable_udp_game_traffic ? [module.ftr_server_sg.id] : []
   ) # Add `module.ssh_sg.id` only for debugging.
   environment              = var.environment

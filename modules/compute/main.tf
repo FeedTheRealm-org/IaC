@@ -30,7 +30,11 @@ useradd --system --home /etc/nomad.d --shell /bin/false nomad || true
 mkdir -p /etc/nomad.d /opt/nomad/data
 chown -R nomad:nomad /etc/nomad.d /opt/nomad/data
 
-LOCAL_IP=$(curl -sf http://169.254.169.254/latest/meta-data/local-ipv4)
+TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" \
+  -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+
+LOCAL_IP=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" \
+  -s http://169.254.169.254/latest/meta-data/local-ipv4)
 
 # Base Nomad config
 cat <<NOMADCFG >/etc/nomad.d/nomad.hcl
@@ -55,6 +59,11 @@ server {
 }
 NOMADCFG
 else
+if [ "${join(" ", var.nomad_server_private_ips)}" = "" ]; then
+  echo "Nomad client bootstrap failed: nomad_server_private_ips is empty."
+  exit 1
+fi
+
 cat <<NOMADCFG >>/etc/nomad.d/nomad.hcl
 client {
   enabled = true
