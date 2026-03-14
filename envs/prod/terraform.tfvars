@@ -35,4 +35,3 @@ nomad_client_nodes = {
   }
 }
 nomad_version             = "1.11.3"
-enable_datadog            = true
