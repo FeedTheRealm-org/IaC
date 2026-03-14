@@ -51,6 +51,7 @@ variable "nomad_role" {
 variable "nomad_bootstrap_expect" {
   description = "Number of servers to expect in the cluster for bootstrapping (server role only)"
   type        = number
+  default     = 1
 }
 
 variable "nomad_server_private_ips" {
