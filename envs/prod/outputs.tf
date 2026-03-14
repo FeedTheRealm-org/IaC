@@ -13,6 +13,22 @@ output "s3_buckets_cloudfront_domains" {
   }
 }
 
-output "ec2_id" {
-  value = module.ec2.id
+output "core_nomad_server_id" {
+  value = module.core_nomad_server.id
+}
+
+output "core_nomad_server_private_ip" {
+  value = module.core_nomad_server.private_ip
+}
+
+output "nomad_client_ids" {
+  value = { for k, m in module.nomad_clients : k => m.id }
+}
+
+output "nomad_client_private_ips" {
+  value = { for k, m in module.nomad_clients : k => m.private_ip }
+}
+
+output "nomad_internal_api" {
+  value = "https://${module.core_nomad_server.private_ip}:4646"
 }

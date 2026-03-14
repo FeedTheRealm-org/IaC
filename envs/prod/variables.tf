@@ -77,3 +77,90 @@ variable "ami" {
   description = "EC2 AMI ID. Find the latest Amazon Linux 2023 AMI with: aws ssm get-parameter --name /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64 --query Parameter.Value --output text"
   type        = string
 }
+
+variable "aws_region" {
+  description = "AWS region for bootstrap scripts"
+  type        = string
+}
+
+variable "core_nomad_server_instance_type" {
+  description = "Instance type used by the mixed core-service + Nomad server node"
+  type        = string
+}
+
+variable "nomad_client_nodes" {
+  description = "Nomad client nodes keyed by Nomad node name"
+  type = map(object({
+    name                    = string
+    instance_type           = string
+    enable_udp_game_traffic = bool
+  }))
+}
+
+variable "nomad_allowed_cidr_blocks" {
+  description = "Optional CIDR blocks allowed to access Nomad ports"
+  type        = list(string)
+  default     = []
+}
+
+variable "nomad_datacenter" {
+  description = "Nomad datacenter"
+  type        = string
+}
+
+variable "nomad_region" {
+  description = "Nomad region"
+  type        = string
+}
+
+variable "nomad_version" {
+  description = "Nomad version bootstrapped on EC2 nodes"
+  type        = string
+  default     = "1.11.3"
+}
+
+variable "nomad_acl_enabled" {
+  description = "Enable Nomad ACL"
+  type        = bool
+}
+
+variable "enable_datadog" {
+  description = "Enable Datadog bootstrap on Nomad nodes"
+  type        = bool
+}
+
+variable "nomad_gossip_key" {
+  description = "Nomad gossip encryption key"
+  type        = string
+  sensitive   = true
+}
+
+variable "nomad_tls_ca_pem" {
+  description = "Nomad TLS CA certificate contents"
+  type        = string
+  sensitive   = true
+}
+
+variable "nomad_tls_cert_pem" {
+  description = "Nomad TLS certificate contents"
+  type        = string
+  sensitive   = true
+}
+
+variable "nomad_tls_key_pem" {
+  description = "Nomad TLS private key contents"
+  type        = string
+  sensitive   = true
+}
+
+variable "nomad_agent_token" {
+  description = "Nomad agent ACL token used by server/clients"
+  type        = string
+  sensitive   = true
+}
+
+variable "nomad_core_service_token" {
+  description = "Nomad ACL token used by core-service to submit jobs"
+  type        = string
+  sensitive   = true
+}
