@@ -108,6 +108,7 @@ module "core_nomad_server" {
   security_group_ids     = [module.http_sg.id, module.nomad_sg.id, module.ssh_sg.id] # Add `module.ssh_sg.id` only for debugging.
   environment            = var.environment
   aws_region             = var.aws_region
+  ecr_registry           = split("/", module.core_service_ecr.repository_url)[0]
   nomad_version          = var.nomad_version
   nomad_role             = "server"
   nomad_bootstrap_expect = 1
@@ -135,6 +136,7 @@ module "nomad_clients" {
   ) # Add `module.ssh_sg.id` only for debugging.
   environment              = var.environment
   aws_region               = var.aws_region
+  ecr_registry             = split("/", module.core_service_ecr.repository_url)[0]
   nomad_version            = var.nomad_version
   nomad_role               = "client"
   nomad_server_private_ips = [module.core_nomad_server.private_ip]

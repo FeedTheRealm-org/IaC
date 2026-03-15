@@ -8,6 +8,11 @@ variable "aws_region" {
   type        = string
 }
 
+variable "ecr_registry" {
+  description = "ECR registry hostname used by Docker credHelpers"
+  type        = string
+}
+
 variable "instance_type" {
   description = "EC2 instance type"
   type        = string

@@ -12,23 +12,52 @@ resource "aws_instance" "this" {
 #!/bin/bash
 set -e
 
-yum install -y docker unzip jq awscli
+yum install -y docker unzip jq awscli amazon-ecr-credential-helper
 
 systemctl enable docker
 systemctl start docker
 
 usermod -aG docker ec2-user
 
+mkdir -p /etc/docker
+mkdir -p /root/.docker
+cat <<DOCKERCFG >/etc/docker/config.json
+{
+  "credHelpers": {
+    "${var.ecr_registry}": "ecr-login"
+  }
+}
+DOCKERCFG
+cat <<DOCKERCFG >/root/.docker/config.json
+{
+  "credHelpers": {
+    "${var.ecr_registry}": "ecr-login"
+  }
+}
+DOCKERCFG
+systemctl restart docker
+
+
+
 # Install Nomad
 curl -fsSL https://releases.hashicorp.com/nomad/${var.nomad_version}/nomad_${var.nomad_version}_linux_amd64.zip -o /tmp/nomad.zip
 unzip -o /tmp/nomad.zip -d /usr/local/bin
 chmod +x /usr/local/bin/nomad
 
+# Install CNI plugins
+CNI_VERSION="v1.9.0"
+mkdir -p /opt/cni/bin /opt/cni/config
+curl -L \
+https://github.com/containernetworking/plugins/releases/download/$${CNI_VERSION}/cni-plugins-linux-amd64-$${CNI_VERSION}.tgz \
+-o /tmp/cni.tgz
+tar -C /opt/cni/bin -xzf /tmp/cni.tgz
+
 # Create nomad user
 useradd --system --home /etc/nomad.d --shell /bin/false nomad || true
+usermod -aG docker nomad
 
-mkdir -p /etc/nomad.d /opt/nomad/data
-chown -R nomad:nomad /etc/nomad.d /opt/nomad/data
+mkdir -p /etc/nomad.d /opt/nomad/data /opt/nomad/alloc_mounts /opt/nomad/tmp
+chown -R nomad:nomad /etc/nomad.d /opt/nomad
 
 TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" \
   -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
@@ -42,6 +71,7 @@ datacenter = "dc1"
 region     = "global"
 data_dir   = "/opt/nomad/data"
 bind_addr  = "0.0.0.0"
+log_level  = "INFO"
 
 advertise {
   http = "$LOCAL_IP:4646"
@@ -67,13 +97,21 @@ fi
 cat <<NOMADCFG >>/etc/nomad.d/nomad.hcl
 client {
   enabled = true
-  servers = [${join(", ", [for ip in var.nomad_server_private_ips : format("\"%s:4647\"", ip)])}]
+  servers = [${join(", ", [for ip in var.nomad_server_private_ips : format("\"%s\"", ip)])}]
+  cni_path       = "/opt/cni/bin"
+  cni_config_dir = "/opt/cni/config"
+  min_dynamic_port = 10000
+  max_dynamic_port = 10255
 }
 
 plugin "docker" {
   config {
     volumes {
       enabled = true
+    }
+
+    auth {
+      helper = "ecr-login"
     }
   }
 }
@@ -92,8 +130,6 @@ Requires=docker.service
 Wants=network-online.target
 
 [Service]
-User=nomad
-Group=nomad
 ExecStart=/usr/local/bin/nomad agent -config=/etc/nomad.d
 Restart=on-failure
 LimitNOFILE=65536
