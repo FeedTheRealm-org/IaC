@@ -64,7 +64,11 @@ module "ec2_role" {
   ssm_parameter_paths = [
     "/core-service/*",
     "/ftr-server/*",
-    "/monitoring/*"
+    "/monitoring/*",
+    "/nomad/*"
+  ]
+  ssm_write_parameter_paths = [
+    "/nomad/*"
   ]
   upload_buckets = [
     for m in module.s3_buckets : m.bucket_arn
@@ -236,9 +240,14 @@ module "nomad_params" {
   source = "../../modules/parameter_store/ssm_parameters"
 
   parameters = {
-    "/core-service/NOMAD_ADDR" = {
+    "/nomad/NOMAD_ADDR" = {
       value = "http://${module.core_nomad_server.private_ip}:4646"
       type  = "String"
+    }
+
+    "/nomad/NOMAD_TOKEN" = {
+      value = "placeholder" # Written on bootstrap script
+      type  = "SecureString"
     }
   }
 }

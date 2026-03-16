@@ -65,6 +65,10 @@ advertise {
   rpc  = "$LOCAL_IP:4647"
   serf = "$LOCAL_IP:4648"
 }
+
+acl {
+  enabled = true
+}
 NOMADCFG
 
 # Role specific config
@@ -128,6 +132,100 @@ SYSTEMD
 systemctl daemon-reload
 systemctl enable nomad
 systemctl start nomad
+
+%{ if nomad_role == "server" ~}
+# ACL Bootstrap — only runs if not already bootstrapped
+echo "Waiting for Nomad to be ready..."
+NOMAD_READY=false
+for i in $(seq 1 12); do
+  if curl -s http://127.0.0.1:4646/v1/status/leader | grep -q '"'; then
+    echo "Nomad ready."
+    NOMAD_READY=true
+    break
+  fi
+  echo "Attempt $i/12, retrying in 5s..."
+  sleep 5
+done
+
+if [ "$NOMAD_READY" != "true" ]; then
+  echo "Nomad failed to become ready after 60s, aborting."
+  exit 1
+fi
+
+EXISTING_TOKEN=$(aws ssm get-parameter \
+  --name "/nomad/root_token" \
+  --with-decryption \
+  --query "Parameter.Value" \
+  --output text \
+  --region ${aws_region} 2>/dev/null || echo "")
+
+if [ -z "$EXISTING_TOKEN" ]; then
+  echo "Bootstrapping Nomad ACLs..."
+  BOOTSTRAP_OUTPUT=$(nomad acl bootstrap 2>&1)
+  ROOT_TOKEN=$(echo "$BOOTSTRAP_OUTPUT" | grep "Secret ID" | awk '{print $4}')
+
+  if [ -z "$ROOT_TOKEN" ]; then
+    echo "ACL bootstrap failed: $BOOTSTRAP_OUTPUT"
+    exit 1
+  fi
+
+  aws ssm put-parameter \
+    --name "/nomad/root_token" \
+    --value "$ROOT_TOKEN" \
+    --type "SecureString" \
+    --region ${aws_region}
+
+  echo "Root token stored in SSM."
+else
+  echo "Nomad ACLs already bootstrapped, skipping."
+fi
+
+# Create core-service policy and token
+ROOT_TOKEN=$(aws ssm get-parameter \
+  --name "/nomad/root_token" \
+  --with-decryption \
+  --query "Parameter.Value" \
+  --output text \
+  --region ${aws_region})
+
+EXISTING_CS_TOKEN=$(aws ssm get-parameter \
+  --name "/nomad/NOMAD_TOKEN" \
+  --with-decryption \
+  --query "Parameter.Value" \
+  --output text \
+  --region ${aws_region} 2>/dev/null || echo "")
+
+if [ -z "$EXISTING_CS_TOKEN" ] || [ "$EXISTING_CS_TOKEN" = "placeholder" ]; then
+  cat <<POLICY >/tmp/core-service-policy.hcl
+namespace "default" {
+  policy       = "write"
+  capabilities = ["submit-job", "read-job", "dispatch-job", "read-logs", "list-jobs", "deregister-job"]
+}
+POLICY
+
+  NOMAD_TOKEN=$ROOT_TOKEN nomad acl policy apply \
+    -description "core-service job management" \
+    core-service-policy /tmp/core-service-policy.hcl
+
+  TOKEN_OUTPUT=$(NOMAD_TOKEN=$ROOT_TOKEN nomad acl token create \
+    -name="NOMAD_TOKEN" \
+    -policy=core-service-policy 2>&1)
+
+  CS_TOKEN=$(echo "$TOKEN_OUTPUT" | grep "Secret ID" | awk '{print $4}')
+
+  aws ssm put-parameter \
+    --name "/nomad/NOMAD_TOKEN" \
+    --value "$CS_TOKEN" \
+    --type "SecureString" \
+    --overwrite \
+    --region ${aws_region}
+
+  echo "core-service token stored in SSM."
+else
+  echo "core-service token already exists, skipping."
+fi
+
+%{ endif ~}
 
 # Datadog setup
 DD_API_KEY=$(aws ssm get-parameter \

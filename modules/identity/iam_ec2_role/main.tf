@@ -42,6 +42,22 @@ resource "aws_iam_role_policy" "ssm_read" {
   })
 }
 
+resource "aws_iam_role_policy" "ssm_write" {
+  role = aws_iam_role.this.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "ssm:PutParameter"
+      ]
+      Resource = [
+        for path in var.ssm_write_parameter_paths : "arn:aws:ssm:us-east-2:*:parameter${path}"
+      ]
+    }]
+  })
+}
+
 resource "aws_iam_role_policy" "s3_upload" {
   role = aws_iam_role.this.id
   policy = jsonencode({
