@@ -7,11 +7,13 @@ provider "aws" {
 module "core_service_ecr" {
   source = "../../modules/container_registry"
   name   = "core-service"
+  is_mutable = false
 }
 
 module "ftr_server_ecr" {
   source = "../../modules/container_registry"
   name   = "ftr-server"
+  is_mutable = true
 }
 
 /* --- GitHub Access ---  */
@@ -162,6 +164,11 @@ module "core_service_params" {
       type  = "String"
     }
 
+    "/core-service/PUBLIC_IP" = {
+      value = module.core_nomad_server.public_ip
+      type  = "String"
+    }
+
     "/core-service/DB_SHOULD_MIGRATE" = {
       value = var.db_should_migrate
       type  = "String"
@@ -245,10 +252,7 @@ module "nomad_params" {
       type  = "String"
     }
 
-    "/nomad/NOMAD_TOKEN" = {
-      value = "placeholder" # Written on bootstrap script
-      type  = "SecureString"
-    }
+    # /nomad/NOMAD_TOKEN (created dynamically in user_data)
   }
 }
 
