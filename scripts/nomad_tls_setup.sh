@@ -10,6 +10,17 @@ if [ -z "$NOMAD_TLS_DIR" ]; then
   exit 1
 fi
 
+mkdir -p $NOMAD_TLS_DIR
+
+echo "Creating the certificates"
+cd $NOMAD_TLS_DIR
+nomad tls ca create
+nomad tls cert create -server -region global -additional-dnsname nomad.internal
+nomad tls cert create -client
+nomad tls cert create -cli
+cd -
+
+echo "Uploading the certificates to SSM"
 aws ssm put-parameter --region "$REGION" --type SecureString --overwrite \
   --name "/nomad/tls/ca_cert" \
   --value "$(cat "$NOMAD_TLS_DIR/nomad-agent-ca.pem")" --profile "$AWS_PROFILE"
@@ -37,3 +48,5 @@ aws ssm put-parameter --region "$REGION" --type SecureString --overwrite \
 aws ssm put-parameter --region "$REGION" --type SecureString --overwrite \
   --name "/nomad/tls/cli_key" \
   --value "$(cat "$NOMAD_TLS_DIR/global-cli-nomad-key.pem")" --profile "$AWS_PROFILE"
+
+echo "Finished nomad tls setup"
