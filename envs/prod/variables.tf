@@ -10,6 +10,10 @@ variable "environment" {
   type = string
 }
 
+variable "vpc_id" {
+  type = string
+}
+
 /* CORE-SERVICE Parameters */
 
 variable "db_should_migrate" {
@@ -51,6 +55,10 @@ variable "database_ssl_cert_path" {
 variable "database_url" {
   type      = string
   sensitive = true
+}
+
+variable "nomad_cert_path" {
+  type = string
 }
 
 /* FTR-SERVER Parameters */

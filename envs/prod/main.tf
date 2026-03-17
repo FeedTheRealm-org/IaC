@@ -5,14 +5,14 @@ provider "aws" {
 /* --- ECR Creation --- */
 
 module "core_service_ecr" {
-  source = "../../modules/container_registry"
-  name   = "core-service"
+  source     = "../../modules/container_registry"
+  name       = "core-service"
   is_mutable = false
 }
 
 module "ftr_server_ecr" {
-  source = "../../modules/container_registry"
-  name   = "ftr-server"
+  source     = "../../modules/container_registry"
+  name       = "ftr-server"
   is_mutable = true
 }
 
@@ -153,6 +153,20 @@ module "nomad_clients" {
   }
 }
 
+/* DNS */
+
+module "internal_dns" {
+  source = "../../modules/networking/dns"
+
+  zone_name = "internal"
+  vpc_id    = var.vpc_id
+
+  records = {
+    "nomad"        = module.core_nomad_server.private_ip
+    "core-service" = module.core_nomad_server.private_ip
+  }
+}
+
 /* SSM Parameters */
 
 module "core_service_params" {
@@ -214,6 +228,11 @@ module "core_service_params" {
       type  = "SecureString"
     }
 
+    "/core-service/NOMAD_CERT_PATH" = {
+      value = var.nomad_cert_path
+      type  = "String"
+    }
+
     "/core-service/FTR_SERVER_IMAGE" = {
       value = "${module.ftr_server_ecr.repository_url}:latest"
       type  = "String"
@@ -248,7 +267,7 @@ module "nomad_params" {
 
   parameters = {
     "/nomad/NOMAD_ADDR" = {
-      value = "http://${module.core_nomad_server.private_ip}:4646"
+      value = "https://nomad.internal:4646"
       type  = "String"
     }
 

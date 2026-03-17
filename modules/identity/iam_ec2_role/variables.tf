@@ -8,7 +8,7 @@ variable "ssm_parameter_paths" {
 }
 
 variable "ssm_write_parameter_paths" {
-  type    = list(string)
+  type = list(string)
 }
 
 variable "upload_buckets" {

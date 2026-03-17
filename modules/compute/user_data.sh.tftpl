@@ -52,6 +52,44 @@ TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" \
 LOCAL_IP=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" \
   -s http://169.254.169.254/latest/meta-data/local-ipv4)
 
+# Fetch TLS certs
+mkdir -p /etc/nomad.d/tls
+
+aws ssm get-parameter --name "/nomad/tls/ca_cert" \
+  --with-decryption --query "Parameter.Value" --output text \
+  --region ${aws_region} > /etc/nomad.d/tls/ca.pem
+
+%{ if nomad_role == "server" ~}
+aws ssm get-parameter --name "/nomad/tls/server_cert" \
+  --with-decryption --query "Parameter.Value" --output text \
+  --region ${aws_region} > /etc/nomad.d/tls/cert.pem
+
+aws ssm get-parameter --name "/nomad/tls/server_key" \
+  --with-decryption --query "Parameter.Value" --output text \
+  --region ${aws_region} > /etc/nomad.d/tls/key.pem
+
+aws ssm get-parameter --name "/nomad/tls/cli_cert" \
+  --with-decryption --query "Parameter.Value" --output text \
+  --region ${aws_region} > /etc/nomad.d/tls/cli_cert.pem
+
+aws ssm get-parameter --name "/nomad/tls/cli_key" \
+  --with-decryption --query "Parameter.Value" --output text \
+  --region ${aws_region} > /etc/nomad.d/tls/cli_key.pem
+%{ else ~}
+aws ssm get-parameter --name "/nomad/tls/client_cert" \
+  --with-decryption --query "Parameter.Value" --output text \
+  --region ${aws_region} > /etc/nomad.d/tls/cert.pem
+
+aws ssm get-parameter --name "/nomad/tls/client_key" \
+  --with-decryption --query "Parameter.Value" --output text \
+  --region ${aws_region} > /etc/nomad.d/tls/key.pem
+%{ endif ~}
+
+chown -R nomad:nomad /etc/nomad.d/tls
+chmod 755 /etc/nomad.d/tls
+chmod 644 /etc/nomad.d/tls/*.pem
+chmod 600 /etc/nomad.d/tls/key.pem
+
 # Base Nomad config
 cat <<NOMADCFG >/etc/nomad.d/nomad.hcl
 datacenter = "dc1"
@@ -68,6 +106,18 @@ advertise {
 
 acl {
   enabled = true
+}
+
+tls {
+  http = true
+  rpc  = true
+
+  ca_file   = "/etc/nomad.d/tls/ca.pem"
+  cert_file = "/etc/nomad.d/tls/cert.pem"
+  key_file  = "/etc/nomad.d/tls/key.pem"
+
+  verify_server_hostname = true
+  verify_https_client    = false
 }
 NOMADCFG
 
@@ -137,7 +187,7 @@ systemctl start nomad
 echo "Waiting for Nomad to be ready..."
 NOMAD_READY=false
 for i in $(seq 1 12); do
-  if curl -s http://127.0.0.1:4646/v1/status/leader | grep -q '"'; then
+  if curl -sk https://127.0.0.1:4646/v1/status/leader | grep -q '"'; then
     echo "Nomad ready."
     NOMAD_READY=true
     break
@@ -151,7 +201,13 @@ if [ "$NOMAD_READY" != "true" ]; then
   exit 1
 fi
 
+
 # Bootstrap ACLs
+export NOMAD_ADDR=https://127.0.0.1:4646
+export NOMAD_CACERT=/etc/nomad.d/tls/ca.pem
+export NOMAD_CLIENT_CERT=/etc/nomad.d/tls/cli_cert.pem
+export NOMAD_CLIENT_KEY=/etc/nomad.d/tls/cli_key.pem
+
 echo "Bootstrapping Nomad ACLs..."
 BOOTSTRAP_OUTPUT=$(nomad acl bootstrap 2>&1)
 ROOT_TOKEN=$(echo "$BOOTSTRAP_OUTPUT" | grep "Secret ID" | awk '{print $4}')
@@ -202,6 +258,14 @@ aws ssm put-parameter \
 
 echo "core-service token stored in SSM."
 
+# Configure Nomad CLI environment to use in SSH sessions
+cat <<'EOF' > /etc/profile.d/nomad.sh
+export NOMAD_ADDR=https://127.0.0.1:4646
+export NOMAD_CACERT=/etc/nomad.d/tls/ca.pem
+export NOMAD_CLIENT_CERT=/etc/nomad.d/tls/cli_cert.pem
+export NOMAD_CLIENT_KEY=/etc/nomad.d/tls/cli_key.pem
+export NOMAD_TOKEN=$(aws ssm get-parameter --name "/nomad/root_token" --with-decryption --query "Parameter.Value" --output text --region us-east-2 2>/dev/null || echo "")
+EOF
 %{ endif ~}
 
 # Datadog setup
