@@ -64,3 +64,19 @@ variable "nomad_server_private_ips" {
   type        = list(string)
   default     = []
 }
+
+variable "consul_version" {
+  description = "Consul version"
+  type        = string
+}
+
+variable "consul_role" {
+  description = "Consul role (server or client)"
+  type        = string
+}
+
+variable "consul_server_private_ips" {
+  description = "Consul server private IPs used by clients"
+  type        = list(string)
+  default     = []
+}
