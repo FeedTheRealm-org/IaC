@@ -188,6 +188,7 @@ module "internal_dns" {
   records = {
     "nomad"        = module.core_nomad_server.private_ip
     "core-service" = module.core_nomad_server.private_ip
+    "consul"       = module.core_nomad_server.private_ip
   }
 }
 
@@ -313,6 +314,11 @@ module "consul_params" {
   source = "../../modules/parameter_store/ssm_parameters"
 
   parameters = {
+    "/consul/CONSUL_ADDR" = {
+      value = "http://consul.internal:8500"
+      type  = "String"
+    }
+
     "/consul/encrypt_key" = {
       value = var.consul_encrypt_key
       type  = "SecureString"
