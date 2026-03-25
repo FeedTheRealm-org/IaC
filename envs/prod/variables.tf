@@ -110,3 +110,13 @@ variable "nomad_version" {
   type        = string
 }
 
+variable "consul_version" {
+  description = "Consul version to install"
+  type        = string
+}
+
+variable "consul_encrypt_key" {
+  description = "Consul gossip encryption key (generate with: consul keygen)"
+  type        = string
+  sensitive   = true
+}

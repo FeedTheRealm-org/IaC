@@ -52,6 +52,104 @@ TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" \
 LOCAL_IP=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" \
   -s http://169.254.169.254/latest/meta-data/local-ipv4)
 
+PUBLIC_IP=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" \
+  -s http://169.254.169.254/latest/meta-data/public-ipv4)
+
+# ============================================================
+# Install and start Consul
+# ============================================================
+
+curl -fsSL https://releases.hashicorp.com/consul/${consul_version}/consul_${consul_version}_linux_amd64.zip \
+  -o /tmp/consul.zip
+unzip -o /tmp/consul.zip -d /usr/local/bin
+chmod +x /usr/local/bin/consul
+
+useradd --system --home /etc/consul.d --shell /bin/false consul || true
+
+mkdir -p /etc/consul.d /opt/consul/data
+chown -R consul:consul /etc/consul.d /opt/consul
+
+# Fetch gossip encrypt key from SSM
+CONSUL_ENCRYPT_KEY=$(aws ssm get-parameter \
+  --name "/consul/encrypt_key" \
+  --with-decryption \
+  --query "Parameter.Value" \
+  --output text \
+  --region ${aws_region})
+
+cat <<CONSULCFG > /etc/consul.d/consul.hcl
+datacenter  = "dc1"
+data_dir    = "/opt/consul/data"
+bind_addr   = "$LOCAL_IP"
+client_addr = "0.0.0.0"
+advertise_addr     = "$LOCAL_IP"
+advertise_addr_wan = "$PUBLIC_IP"
+log_level   = "INFO"
+encrypt     = "$CONSUL_ENCRYPT_KEY"
+
+ui_config {
+  enabled = true
+}
+CONSULCFG
+
+%{ if consul_role == "server" ~}
+cat <<CONSULCFG >> /etc/consul.d/consul.hcl
+server           = true
+bootstrap_expect = 1
+CONSULCFG
+%{ else ~}
+cat <<CONSULCFG >> /etc/consul.d/consul.hcl
+server     = false
+retry_join = ${jsonencode(consul_server_private_ips)}
+CONSULCFG
+%{ endif ~}
+
+chown consul:consul /etc/consul.d/consul.hcl
+chmod 640 /etc/consul.d/consul.hcl
+
+cat <<'SYSTEMD' > /etc/systemd/system/consul.service
+[Unit]
+Description=Consul
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=consul
+Group=consul
+ExecStart=/usr/local/bin/consul agent -config-dir=/etc/consul.d
+Restart=on-failure
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
+SYSTEMD
+
+systemctl daemon-reload
+systemctl enable consul
+systemctl start consul
+
+# Wait for Consul to be ready before starting Nomad
+echo "Waiting for Consul to be ready..."
+CONSUL_READY=false
+for i in $(seq 1 12); do
+  if curl -s http://127.0.0.1:8500/v1/status/leader | grep -q '.'; then
+    echo "Consul ready."
+    CONSUL_READY=true
+    break
+  fi
+  echo "Attempt $i/12, retrying in 5s..."
+  sleep 5
+done
+
+if [ "$CONSUL_READY" != "true" ]; then
+  echo "Consul failed to become ready after 60s, aborting."
+  exit 1
+fi
+
+# ============================================================
+# Install and start Nomad
+# ============================================================
+
 # Fetch TLS certs
 mkdir -p /etc/nomad.d/tls
 
@@ -119,6 +217,10 @@ tls {
   verify_server_hostname = true
   verify_https_client    = false
 }
+
+consul {
+  address = "127.0.0.1:8500"
+}
 NOMADCFG
 
 # Role specific config
@@ -166,8 +268,8 @@ chmod 640 /etc/nomad.d/nomad.hcl
 cat <<'SYSTEMD' >/etc/systemd/system/nomad.service
 [Unit]
 Description=Nomad
-After=network-online.target docker.service
-Requires=docker.service
+After=network-online.target docker.service consul.service
+Requires=docker.service consul.service
 Wants=network-online.target
 
 [Service]
@@ -268,7 +370,10 @@ export NOMAD_TOKEN=$(aws ssm get-parameter --name "/nomad/root_token" --with-dec
 EOF
 %{ endif ~}
 
-# Datadog setup
+# ============================================================
+# Datadog
+# ============================================================
+
 DD_API_KEY=$(aws ssm get-parameter \
   --name "/monitoring/dd_api_key" \
   --with-decryption \

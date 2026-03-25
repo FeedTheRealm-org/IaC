@@ -67,7 +67,8 @@ module "ec2_role" {
     "/core-service/*",
     "/ftr-server/*",
     "/monitoring/*",
-    "/nomad/*"
+    "/nomad/*",
+    "/consul/*"
   ]
   ssm_write_parameter_paths = [
     "/nomad/*"
@@ -102,22 +103,39 @@ module "nomad_sg" {
   allowed_security_group_ids = [module.http_sg.id, module.ftr_server_sg.id]
 }
 
+module "consul_sg" {
+  source = "../../modules/networking/firewall_consul"
+
+  name                       = "consul-internal"
+  allowed_security_group_ids = [module.nomad_sg.id]
+}
+
 module "core_nomad_server" {
   source = "../../modules/compute"
 
   depends_on = [module.monitoring_params]
 
-  ami                    = var.ami
-  instance_type          = var.core_nomad_server_instance_type
-  ssh_key_name           = var.ssh_key_name
-  instance_profile_name  = module.ec2_role.instance_profile_name
-  security_group_ids     = [module.http_sg.id, module.nomad_sg.id, module.ssh_sg.id] # Add `module.ssh_sg.id` only for debugging.
-  environment            = var.environment
-  aws_region             = var.aws_region
-  ecr_registry           = split("/", module.core_service_ecr.repository_url)[0]
+  ami                   = var.ami
+  instance_type         = var.core_nomad_server_instance_type
+  ssh_key_name          = var.ssh_key_name
+  instance_profile_name = module.ec2_role.instance_profile_name
+  security_group_ids = [
+    module.http_sg.id,
+    module.nomad_sg.id,
+    module.consul_sg.id,
+    module.ssh_sg.id
+  ] # Add `module.ssh_sg.id` only for debugging.
+
+  environment  = var.environment
+  aws_region   = var.aws_region
+  ecr_registry = split("/", module.core_service_ecr.repository_url)[0]
+
   nomad_version          = var.nomad_version
   nomad_role             = "server"
   nomad_bootstrap_expect = 1
+
+  consul_version = var.consul_version
+  consul_role    = "server"
 
   tags = {
     Name = "core-nomad-server"
@@ -137,15 +155,21 @@ module "nomad_clients" {
   ssh_key_name          = var.ssh_key_name
   instance_profile_name = module.ec2_role.instance_profile_name
   security_group_ids = concat(
-    [module.nomad_sg.id, module.ssh_sg.id],
+    [module.nomad_sg.id, module.consul_sg.id, module.ssh_sg.id],
     each.value.enable_udp_game_traffic ? [module.ftr_server_sg.id] : []
   ) # Add `module.ssh_sg.id` only for debugging.
-  environment              = var.environment
-  aws_region               = var.aws_region
-  ecr_registry             = split("/", module.core_service_ecr.repository_url)[0]
+
+  environment  = var.environment
+  aws_region   = var.aws_region
+  ecr_registry = split("/", module.core_service_ecr.repository_url)[0]
+
   nomad_version            = var.nomad_version
   nomad_role               = "client"
   nomad_server_private_ips = [module.core_nomad_server.private_ip]
+
+  consul_version            = var.consul_version
+  consul_role               = "client"
+  consul_server_private_ips = [module.core_nomad_server.private_ip]
 
   tags = {
     Name = each.value.name
@@ -164,6 +188,7 @@ module "internal_dns" {
   records = {
     "nomad"        = module.core_nomad_server.private_ip
     "core-service" = module.core_nomad_server.private_ip
+    "consul"       = module.core_nomad_server.private_ip
   }
 }
 
@@ -237,6 +262,16 @@ module "core_service_params" {
       value = "${module.ftr_server_ecr.repository_url}:latest"
       type  = "String"
     }
+
+    "/core-service/ASSETS_COSMETICS_BUCKET_NAME" = {
+      value = module.s3_buckets["cosmetics"].bucket_name
+      type  = "String"
+    }
+
+    "/core-service/ASSETS_WORLDS_BUCKET_NAME" = {
+      value = module.s3_buckets["worlds"].bucket_name
+      type  = "String"
+    }
   }
 }
 
@@ -272,6 +307,22 @@ module "nomad_params" {
     }
 
     # /nomad/NOMAD_TOKEN (created dynamically in user_data)
+  }
+}
+
+module "consul_params" {
+  source = "../../modules/parameter_store/ssm_parameters"
+
+  parameters = {
+    "/consul/CONSUL_ADDR" = {
+      value = "http://consul.internal:8500"
+      type  = "String"
+    }
+
+    "/consul/encrypt_key" = {
+      value = var.consul_encrypt_key
+      type  = "SecureString"
+    }
   }
 }
 
