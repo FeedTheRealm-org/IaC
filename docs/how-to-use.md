@@ -69,6 +69,12 @@ source .env # loads the environment variables into current shell
 cd envs/prod # now everything you do will affect the production environment!
 ```
 
+## Additional Scripts and Operations
+
+### Nomad Initialization
+
+The `scripts/nomad_tls_setup.sh` script is provided to generate and deploy TLS certificates required for secure internal communication across the Nomad servers and clients. Run this script as needed prior to applying your Node constraints if you're rotating keys, or during initial server bootstrap.
+
 ## AWS CLI commands
 
 Some other useful aws commands to run locally are:

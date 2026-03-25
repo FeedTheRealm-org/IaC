@@ -16,19 +16,21 @@ the state changes. Additionally there is a `backend.tf` file which declares wher
 
 ```bash
 .
+├── docs/                     # Documentation files
 ├── envs/
-│   └── prod/
-│       ├── backend.tf
-│       ├── main.tf
-│       └── outputs.tf
-├── modules/
-│   ├── compute/
-│   │   ├── main.tf
-│   │   ├── outputs.tf
-│   │   └── variables.tf
-│   ├── container_registry/
-│   └── identity/
-├── ...
+│   └── prod/                 # Production environment setup
+│       ├── backend.tf
+│       ├── main.tf           # Main definition of created resources
+│       └── outputs.tf
+├── modules/                  # Reusable components
+│   ├── bucket/
+│   ├── compute/
+│   ├── container_registry/
+│   ├── identity/             # IAM, Roles, OIDC mappings
+│   ├── networking/           # DNS, Security Groups
+│   └── parameter_store/      # SSM / Configuration parameters
+├── scripts/                  # Setup / Configuration bash scripts
+└── README.md
 ```
 
 ## Backend
@@ -44,64 +46,71 @@ so **please let the whole team know before applying a infrastructural change!**
 
 The current resources created by terraform are the following:
 
-### IAM roles + policies (8)
+### IAM roles + policies
 
-#### > GitHub ECR pusher roles
+#### > GitHub Actions CI/CD roles
 
-- aws_iam_role (AssumeRoleWithWebIdentity for feedtherealm-org/core-service)
-- aws_iam_role_policy (ecr push)
-- aws_iam_role_policy (ssm deploy)
+- `core_service_ci_role`: Role for GitHub Actions (core-service repo)
+- `ftr_server_ci_role`: Role for GitHub Actions (game repo)
 
 #### > EC2 roles
 
-- aws_iam_role (ec2 role)
-- aws_iam_role_policy (ssm read)
-- aws_iam_role_policy (s3 upload) ✅
-- 2 × aws_iam_role_policy_attachment (ecr pull, ssm managed)
+- `generic-ec2-role`: Instance profile for EC2 nodes with SSM, S3 upload, and ECR pull access.
 
 ---
 
-### OIDC providers (1)
-- aws_iam_openid_connect_provider (github)
+### OIDC providers
+
+- `github_oidc`: GitHub OpenID Connect provider
 
 ---
 
-### SSM Parameters (10)
-- core-service environment variables (10 variables)
+### SSM Parameters
+
+- `/core-service/*`: 13 parameters
+- `/ftr-server/*`: 1 parameter
+- `/monitoring/*`: Datadog agent configuration
+- `/nomad/*`: Nomad bootstrap/address parameters
 
 ---
 
-### Security groups (2)
-- aws_security_group (http-only group)
-- aws_security_group (ssh-only group) 🚩 Only active when debugging, otherwise removed
+### Security groups
+
+- `http_sg`: HTTP access (TCP 80)
+- `ssh_sg`: SSH access (TCP 22) - generally for debugging
+- `ftr_server_sg`: FTR game server UDP traffic access
+- `nomad_sg`: Internal Nomad cluster communication
 
 ---
 
-### ECR (1)
-- aws_ecr_repository (core service)
+### ECR
+
+- `core-service` (Immutable)
+- `ftr-server` (Mutable)
 
 ---
 
-### EC2 (1)
-- aws_instance (core service)
+### EC2 (Compute)
+
+- `core_nomad_server`: Main Nomad Server instance
+- `nomad_clients`: Variable number of Nomad client nodes
 
 ---
 
-### S3 + CloudFront (2 buckets)
+### S3 + CloudFront Buckets
 
-For each bucket:
-- aws_s3_bucket
-- aws_s3_bucket_policy (CloudFront-only read)
-- aws_cloudfront_distribution
-- aws_cloudfront_origin_access_control
+- Variable-driven bucket configurations (e.g. `cosmetics`, `worlds`)
 
-Buckets:
-- cosmetics
-- worlds
+---
+
+### DNS
+
+- `internal`: Internal Route53 Zone for service discovery (`nomad.internal`, `core-service.internal`)
 
 ## External Resources
 
 The externally created resources are (1) the following:
+
 - S3 bucket (feedtherealm-terraform-state)
 
 [[More Info >]](./docs/external-commands.md) (cli commands history)
@@ -115,4 +124,3 @@ Some useful links..
 - [AWS cli docs](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html)
 - [AWS github actions](https://github.com/orgs/aws-actions/repositories?type=all) + [OIDC](https://docs.github.com/en/actions/reference/security/oidc#methods-for-requesting-the-oidc-token) + [GH Thumbprint](https://github.blog/changelog/2023-06-27-github-actions-update-on-oidc-integration-with-aws/)
 - [AWS general docs](https://docs.aws.amazon.com/)
-
