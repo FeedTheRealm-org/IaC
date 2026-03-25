@@ -27,7 +27,7 @@ the state changes. Additionally there is a `backend.tf` file which declares wher
 │   ├── compute/
 │   ├── container_registry/
 │   ├── identity/             # IAM, Roles, OIDC mappings
-│   ├── networking/           # DNS, Security Groups
+│   ├── networking/           # DNS, Security Groups, Firewalls
 │   └── parameter_store/      # SSM / Configuration parameters
 ├── scripts/                  # Setup / Configuration bash scripts
 └── README.md
@@ -67,10 +67,11 @@ The current resources created by terraform are the following:
 
 ### SSM Parameters
 
-- `/core-service/*`: 13 parameters
+- `/core-service/*`: 15 parameters (including S3 bucket configs)
 - `/ftr-server/*`: 1 parameter
 - `/monitoring/*`: Datadog agent configuration
 - `/nomad/*`: Nomad bootstrap/address parameters
+- `/consul/*`: Consul address and encryption parameters
 
 ---
 
@@ -80,6 +81,7 @@ The current resources created by terraform are the following:
 - `ssh_sg`: SSH access (TCP 22) - generally for debugging
 - `ftr_server_sg`: FTR game server UDP traffic access
 - `nomad_sg`: Internal Nomad cluster communication
+- `consul_sg`: Internal Consul cluster communication
 
 ---
 
@@ -92,8 +94,8 @@ The current resources created by terraform are the following:
 
 ### EC2 (Compute)
 
-- `core_nomad_server`: Main Nomad Server instance
-- `nomad_clients`: Variable number of Nomad client nodes
+- `core_nomad_server`: Main Nomad and Consul Server instance
+- `nomad_clients`: Variable number of Nomad and Consul client nodes
 
 ---
 
@@ -105,7 +107,7 @@ The current resources created by terraform are the following:
 
 ### DNS
 
-- `internal`: Internal Route53 Zone for service discovery (`nomad.internal`, `core-service.internal`)
+- `internal`: Internal Route53 Zone for service discovery (`nomad.internal`, `core-service.internal`, `consul.internal`)
 
 ## External Resources
 
