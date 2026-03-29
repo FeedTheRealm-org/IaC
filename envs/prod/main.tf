@@ -272,6 +272,16 @@ module "core_service_params" {
       value = module.s3_buckets["worlds"].bucket_name
       type  = "String"
     }
+
+    "/core-service/STRIPE_API_KEY" = {
+      value = var.stripe_api_key
+      type  = "SecureString"
+    }
+
+    "/core-service/STRIPE_WEBHOOK_SECRET" = {
+      value = var.stripe_webhook_secret
+      type  = "SecureString"
+    }
   }
 }
 

@@ -61,6 +61,16 @@ variable "nomad_cert_path" {
   type = string
 }
 
+variable "stripe_api_key" {
+  type      = string
+  sensitive = true
+}
+
+variable "stripe_webhook_secret" {
+  type      = string
+  sensitive = true
+}
+
 /* FTR-SERVER Parameters */
 
 variable "ftr_core_service_url" {
