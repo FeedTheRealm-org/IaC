@@ -130,3 +130,24 @@ variable "consul_encrypt_key" {
   type        = string
   sensitive   = true
 }
+
+variable "public_domain_name" {
+  description = "Public domain managed in Route53"
+  type        = string
+}
+
+variable "public_apex_ipv4" {
+  description = "IPv4 value for the apex A record of the public domain"
+  type        = string
+}
+
+variable "public_www_cname_target" {
+  description = "CNAME target used for the www subdomain"
+  type        = string
+}
+
+variable "public_dns_ttl" {
+  description = "TTL for managed public DNS records"
+  type        = number
+  default     = 300
+}

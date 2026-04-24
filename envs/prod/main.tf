@@ -2,6 +2,38 @@ provider "aws" {
   region = var.aws_region
 }
 
+locals {
+  public_client_dns_records = {
+    for idx, key in sort(keys(var.nomad_client_nodes)) :
+    "s${idx + 1}" => {
+      type    = "A"
+      ttl     = var.public_dns_ttl
+      records = [module.nomad_client_eips[key].public_ip]
+    }
+  }
+
+  public_dns_records = merge(
+    {
+      "@" = {
+        type    = "A"
+        ttl     = var.public_dns_ttl
+        records = [var.public_apex_ipv4]
+      }
+      "www" = {
+        type    = "CNAME"
+        ttl     = var.public_dns_ttl
+        records = [var.public_www_cname_target]
+      }
+      "core" = {
+        type    = "A"
+        ttl     = var.public_dns_ttl
+        records = [module.core_nomad_server_eip.public_ip]
+      }
+    },
+    local.public_client_dns_records
+  )
+}
+
 /* --- ECR Creation --- */
 
 module "core_service_ecr" {
@@ -199,6 +231,13 @@ module "nomad_client_eips" {
     Name = "${each.value.name}-eip"
     Role = "nomad-client"
   }
+}
+
+module "public_dns_records" {
+  source = "../../modules/networking/public_dns_records"
+
+  zone_name = var.public_domain_name
+  records   = local.public_dns_records
 }
 
 /* DNS */

@@ -11,15 +11,19 @@ buckets = {
 }
 
 # Non-secret parameters
-environment            = "production"
-db_should_migrate      = "true"
-email_sender_address   = "atusgames.official@gmail.com"
-session_token_duration = "24h"
-email_logo_url         = "https://avatars.githubusercontent.com/u/231922724?s=400"
-nomad_cert_path        = "/etc/nomad.d/tls/ca.pem"
-ftr_core_service_url   = "ec2-3-148-169-231.us-east-2.compute.amazonaws.com"
-ami                    = "ami-0b0b78dcacbab728f" # Amazon Linux 2023 with kernel 6.1, 2024-06-01.
-vpc_id                 = "vpc-040aac61ba7d0c39b"
+environment             = "production"
+db_should_migrate       = "true"
+email_sender_address    = "atusgames.official@gmail.com"
+session_token_duration  = "24h"
+email_logo_url          = "https://avatars.githubusercontent.com/u/231922724?s=400"
+public_domain_name      = "feedtherealm.world"
+public_apex_ipv4        = "216.198.79.1"
+public_www_cname_target = "7199996a935df1e3.vercel-dns-017.com."
+public_dns_ttl          = 300
+nomad_cert_path         = "/etc/nomad.d/tls/ca.pem"
+ftr_core_service_url    = "core.feedtherealm.world"
+ami                     = "ami-0b0b78dcacbab728f" # Amazon Linux 2023 with kernel 6.1, 2024-06-01.
+vpc_id                  = "vpc-040aac61ba7d0c39b"
 
 # Nomad cluster topology defaults
 aws_region                      = "us-east-2"

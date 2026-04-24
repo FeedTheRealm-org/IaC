@@ -40,3 +40,15 @@ output "nomad_client_elastic_ips" {
 output "nomad_internal_api" {
   value = "http://${module.core_nomad_server.private_ip}:4646"
 }
+
+output "public_dns_zone_id" {
+  value = module.public_dns_records.zone_id
+}
+
+output "public_dns_name_servers" {
+  value = module.public_dns_records.name_servers
+}
+
+output "public_dns_record_fqdns" {
+  value = module.public_dns_records.record_fqdns
+}
