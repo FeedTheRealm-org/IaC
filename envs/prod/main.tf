@@ -177,6 +177,30 @@ module "nomad_clients" {
   }
 }
 
+module "core_nomad_server_eip" {
+  source = "../../modules/networking/elastic_ip"
+
+  instance_id = module.core_nomad_server.id
+
+  tags = {
+    Name = "core-nomad-server-eip"
+    Role = "nomad-server"
+  }
+}
+
+module "nomad_client_eips" {
+  for_each = var.nomad_client_nodes
+
+  source = "../../modules/networking/elastic_ip"
+
+  instance_id = module.nomad_clients[each.key].id
+
+  tags = {
+    Name = "${each.value.name}-eip"
+    Role = "nomad-client"
+  }
+}
+
 /* DNS */
 
 module "internal_dns" {
@@ -204,7 +228,7 @@ module "core_service_params" {
     }
 
     "/core-service/PUBLIC_IP" = {
-      value = module.core_nomad_server.public_ip
+      value = module.core_nomad_server_eip.public_ip
       type  = "String"
     }
 

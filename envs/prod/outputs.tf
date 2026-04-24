@@ -21,12 +21,20 @@ output "core_nomad_server_private_ip" {
   value = module.core_nomad_server.private_ip
 }
 
+output "core_nomad_server_elastic_ip" {
+  value = module.core_nomad_server_eip.public_ip
+}
+
 output "nomad_client_ids" {
   value = { for k, m in module.nomad_clients : k => m.id }
 }
 
 output "nomad_client_private_ips" {
   value = { for k, m in module.nomad_clients : k => m.private_ip }
+}
+
+output "nomad_client_elastic_ips" {
+  value = { for k, m in module.nomad_client_eips : k => m.public_ip }
 }
 
 output "nomad_internal_api" {
