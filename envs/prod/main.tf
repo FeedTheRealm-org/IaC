@@ -162,6 +162,12 @@ module "core_nomad_server" {
   aws_region   = var.aws_region
   ecr_registry = split("/", module.core_service_ecr.repository_url)[0]
 
+  nginx_enabled = true
+  nginx_domain  = "core.${var.public_domain_name}"
+  nginx_email   = var.email_sender_address
+  nginx_upstream_host = "core-service.internal"
+  nginx_upstream_port = 34782
+
   nomad_version          = var.nomad_version
   nomad_role             = "server"
   nomad_bootstrap_expect = 1
@@ -194,6 +200,8 @@ module "nomad_clients" {
   environment  = var.environment
   aws_region   = var.aws_region
   ecr_registry = split("/", module.core_service_ecr.repository_url)[0]
+
+  nginx_enabled = false
 
   nomad_version            = var.nomad_version
   nomad_role               = "client"

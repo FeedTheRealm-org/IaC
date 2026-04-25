@@ -43,6 +43,35 @@ variable "environment" {
   type        = string
 }
 
+variable "nginx_enabled" {
+  description = "Enable NGINX reverse proxy and HTTPS setup"
+  type        = bool
+}
+
+variable "nginx_domain" {
+  description = "Public domain used by NGINX and certbot"
+  type        = string
+  default     = ""
+}
+
+variable "nginx_email" {
+  description = "Email used by certbot registration"
+  type        = string
+  default     = ""
+}
+
+variable "nginx_upstream_host" {
+  description = "Upstream hostname that NGINX proxies to"
+  type        = string
+  default     = ""
+}
+
+variable "nginx_upstream_port" {
+  description = "Upstream port that NGINX proxies to"
+  type        = number
+  default     = -1
+}
+
 variable "nomad_version" {
   description = "Nomad version used in bootstrap"
   type        = string

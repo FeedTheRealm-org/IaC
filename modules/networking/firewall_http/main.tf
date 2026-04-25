@@ -1,10 +1,18 @@
 resource "aws_security_group" "this" {
   name        = var.name
-  description = "Allow HTTP only"
+  description = "Allow HTTP(s) only"
+
+  // Needed for HTTP-01 challenge
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
   ingress {
-    from_port   = 34782
-    to_port     = 34782
+    from_port   = 443
+    to_port     = 443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }

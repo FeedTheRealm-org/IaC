@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 
+yum update -y
 yum install -y docker unzip jq awscli amazon-ecr-credential-helper
 
 systemctl enable docker
@@ -368,6 +369,14 @@ export NOMAD_CLIENT_CERT=/etc/nomad.d/tls/cli_cert.pem
 export NOMAD_CLIENT_KEY=/etc/nomad.d/tls/cli_key.pem
 export NOMAD_TOKEN=$(aws ssm get-parameter --name "/nomad/root_token" --with-decryption --query "Parameter.Value" --output text --region us-east-2 2>/dev/null || echo "")
 EOF
+%{ endif ~}
+
+%{ if nginx_enabled ~}
+# ============================================================
+# NGINX + TLS reverse proxy
+# ============================================================
+
+${nginx_setup_script}
 %{ endif ~}
 
 # ============================================================

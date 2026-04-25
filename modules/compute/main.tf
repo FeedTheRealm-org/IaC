@@ -9,9 +9,16 @@ resource "aws_instance" "this" {
   user_data_replace_on_change = true
 
   user_data = templatefile("${path.module}/user_data.sh.tftpl", {
-    aws_region                = var.aws_region
-    ecr_registry              = var.ecr_registry
-    environment               = var.environment
+    aws_region    = var.aws_region
+    ecr_registry  = var.ecr_registry
+    environment   = var.environment
+    nginx_enabled = var.nginx_enabled
+    nginx_setup_script = var.nginx_enabled ? templatefile("${path.module}/nginx.sh.tftpl", {
+      domain        = var.nginx_domain
+      email         = var.nginx_email
+      upstream_host = var.nginx_upstream_host
+      upstream_port = var.nginx_upstream_port
+    }) : ""
     nomad_bootstrap_expect    = var.nomad_bootstrap_expect
     nomad_role                = var.nomad_role
     nomad_server_private_ips  = var.nomad_server_private_ips
