@@ -99,7 +99,16 @@ The compute module user data does all of the following:
 - HTTP security group allows both `80` and `443`.
 - NGINX/Certbot on the core node expects DNS for `core.<public_domain_name>` to resolve to the core node EIP.
 
-## 5. Useful operational commands
+## Nomad UI
+
+In order to access the nomad UI you must follow these steps:
+
+1. Connect to the instance via ssh and forward the port to localhost: `ssh -i <ssh_key_file> -L 4646:localhost:4646 ec2-user@core.feedtherealm.world`
+2. Enter the website at `https://localhost:4646`
+3. Get the `nomad/root_token` as shown in the following useful commands
+4. Sign in using that token to get full admin access
+
+## Useful operational commands
 
 ```bash
 # Get the latests SSM commands that runned
@@ -121,6 +130,14 @@ aws ssm get-parameter \
     --output text \
     --region us-east-2 \
     --profile <name>
+
+# Nomad root token to view UI as ADMIN
+aws ssm get-parameter \
+  --name "/nomad/root_token" \
+  --with-decryption \
+  --query "Parameter.Value" \
+  --output text \
+  --profile <name>
 
 # HTTPS smoke test
 curl -I https://core.feedtherealm.world
