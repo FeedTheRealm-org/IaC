@@ -1,13 +1,26 @@
 variable "zone_name" {
-  type = string
+  description = "Route53 hosted zone name"
+  type        = string
 }
 
 variable "vpc_id" {
-  type = string
+  description = "VPC ID for private hosted zones. Leave null for public zones."
+  type        = string
+  default     = null
+}
+
+variable "allow_overwrite" {
+  description = "Allow Terraform to overwrite existing records with the same name and type"
+  type        = bool
+  default     = true
 }
 
 variable "records" {
-  type        = map(string)
-  description = "Map of record name to IP address e.g. { nomad = '172.31.x.x' }"
-  default     = {}
+  description = "Map of DNS label to record config. Use @ for apex zone record."
+  type = map(object({
+    type    = string
+    ttl     = number
+    records = list(string)
+  }))
+  default = {}
 }

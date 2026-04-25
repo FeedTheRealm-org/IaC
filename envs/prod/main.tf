@@ -234,7 +234,7 @@ module "nomad_client_eips" {
 }
 
 module "public_dns_records" {
-  source = "../../modules/networking/public_dns_records"
+  source = "../../modules/networking/dns"
 
   zone_name = var.public_domain_name
   records   = local.public_dns_records
@@ -249,9 +249,21 @@ module "internal_dns" {
   vpc_id    = var.vpc_id
 
   records = {
-    "nomad"        = module.core_nomad_server.private_ip
-    "core-service" = module.core_nomad_server.private_ip
-    "consul"       = module.core_nomad_server.private_ip
+    "nomad" = {
+      type    = "A"
+      ttl     = 60
+      records = [module.core_nomad_server.private_ip]
+    }
+    "core-service" = {
+      type    = "A"
+      ttl     = 60
+      records = [module.core_nomad_server.private_ip]
+    }
+    "consul" = {
+      type    = "A"
+      ttl     = 60
+      records = [module.core_nomad_server.private_ip]
+    }
   }
 }
 
