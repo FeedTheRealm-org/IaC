@@ -2,7 +2,9 @@
 
 This repository declares as code the state of the current AWS infrastructure of the project.
 
-[[How to use >]](./docs/how-to-use.md)
+- [How to use](./docs/how-to-use.md)
+- [Current infrastructure and bootstrap behavior](./docs/infrastructure-current-state.md)
+- [External/manual commands](./docs/external-commands.md)
 
 ## Structure
 
@@ -37,92 +39,34 @@ the state changes. Additionally there is a `backend.tf` file which declares wher
 
 The current status of the backend is an **S3** bucket that saves the terraform states in `prod/terraform.tfstate` in an encrypted manner.
 
-⚠️ The backend does not have a DynamoDB lock, therefore concurrent applies can cause the infrastructure to corrupt and will have to be fixed manually,
-so **please let the whole team know before applying a infrastructural change!**
+⚠️ Warning: there is no DynamoDB state lock configured. Coordinate with the team before running apply operations.
 
-## Resources
+## Current Infrastructure
 
-⚠️ **Keep this up to date after any change!**
+For the current deployed state and bootstrap behavior, use:
 
-The current resources created by terraform are the following:
+- [Current infrastructure and bootstrap behavior](./docs/infrastructure-current-state.md)
 
-### IAM roles + policies
+In short, prod currently includes:
 
-#### > GitHub Actions CI/CD roles
+- Identity: GitHub OIDC + CI roles + EC2 runtime role
+- Compute: one core node and a variable number of Nomad clients
+- Networking: security groups, Elastic IPs, Route53 public/private DNS
+- Platform services: Nomad + Consul + Datadog, plus optional NGINX HTTPS on core
+- Data/services: ECR repos, S3/CloudFront assets, SSM parameter namespaces
 
-- `core_service_ci_role`: Role for GitHub Actions (core-service repo)
-- `ftr_server_ci_role`: Role for GitHub Actions (game repo)
+## External resources and prerequisites
 
-#### > EC2 roles
+- Terraform backend S3 bucket (created outside Terraform)
+- Existing VPC passed through `vpc_id`
+- Registrar NS delegation for the public domain hosted zone
 
-- `generic-ec2-role`: Instance profile for EC2 nodes with SSM, S3 upload, and ECR pull access.
-
----
-
-### OIDC providers
-
-- `github_oidc`: GitHub OpenID Connect provider
-
----
-
-### SSM Parameters
-
-- `/core-service/*`: 15 parameters (including S3 bucket configs)
-- `/ftr-server/*`: 1 parameter
-- `/monitoring/*`: Datadog agent configuration
-- `/nomad/*`: Nomad bootstrap/address parameters
-- `/consul/*`: Consul address and encryption parameters
-
----
-
-### Security groups
-
-- `http_sg`: HTTP access (TCP 80)
-- `ssh_sg`: SSH access (TCP 22) - generally for debugging
-- `ftr_server_sg`: FTR game server UDP traffic access
-- `nomad_sg`: Internal Nomad cluster communication
-- `consul_sg`: Internal Consul cluster communication
-
----
-
-### ECR
-
-- `core-service` (Immutable)
-- `ftr-server` (Mutable)
-
----
-
-### EC2 (Compute)
-
-- `core_nomad_server`: Main Nomad and Consul Server instance
-- `nomad_clients`: Variable number of Nomad and Consul client nodes
-
----
-
-### S3 + CloudFront Buckets
-
-- Variable-driven bucket configurations (e.g. `cosmetics`, `worlds`)
-
----
-
-### DNS
-
-- `internal`: Internal Route53 Zone for service discovery (`nomad.internal`, `core-service.internal`, `consul.internal`)
-
-## External Resources
-
-The externally created resources are (1) the following:
-
-- S3 bucket (feedtherealm-terraform-state)
-
-[[More Info >]](./docs/external-commands.md) (cli commands history)
+See [external commands](./docs/external-commands.md) for command history/examples.
 
 ## References
 
-Some useful links..
-
-- [Terraform for AWS docs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
-- [General terraform docs](https://developer.hashicorp.com/terraform/docs)
-- [AWS cli docs](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html)
-- [AWS github actions](https://github.com/orgs/aws-actions/repositories?type=all) + [OIDC](https://docs.github.com/en/actions/reference/security/oidc#methods-for-requesting-the-oidc-token) + [GH Thumbprint](https://github.blog/changelog/2023-06-27-github-actions-update-on-oidc-integration-with-aws/)
-- [AWS general docs](https://docs.aws.amazon.com/)
+- [Terraform AWS Provider docs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
+- [Terraform docs](https://developer.hashicorp.com/terraform/docs)
+- [AWS CLI docs](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html)
+- [GitHub Actions with AWS](https://github.com/orgs/aws-actions/repositories?type=all)
+- [GitHub OIDC docs](https://docs.github.com/en/actions/reference/security/oidc#methods-for-requesting-the-oidc-token)

@@ -1,10 +1,10 @@
 # How to use
 
-This document contains useful commands to manage the infrastructure this repository defines.
+This document describes the operational workflow for the Terraform in this repository.
 
 ## Get started
 
-Configure yout aws account (you need access keys):
+Configure AWS credentials:
 
 ```bash
 aws configure --profile <name> (e.g. iamadmin)
@@ -29,7 +29,7 @@ AWS_PROFILE=<name> terraform init [-reconfigure] # reconfigure if unsure if conn
 📝 Then you can plan the changes for the infrastructure to reflect specified changes in definitions.
 
 ```bash
-AWS_PROFILE=<name> terraform plan
+AWS_PROFILE=<name> terraform plan # from /envs/prod
 # See the diff of current state and new desired state (none if no changes where made)
 ```
 
@@ -53,31 +53,53 @@ AWS_PROFILE=<name> terraform destroy # DONT DO IT!
 AWS_PROFILE=<name> terraform refresh
 ```
 
-## Environments & Environment variables
+## Environment variables
 
 When you need to plan or apply you will need your .env in place, for that checkout the `.env.example`.
 It containts a series of exports that are needed and will be used by terraform (they are secrets, you know where to get them from).
 
 ```bash
-source .env # loads the environment variables into current shell
-# ready for terraform stuff ...
+cp envs/prod/.env.example envs/prod/.env # and complete values
+source envs/prod/.env
 ```
 
-**About environments**, you need to `cd` into the specific environment you want to make changes to, for example:
+Generate/upload Nomad TLS certificates when bootstrapping the cluster for the first time or after rotation:
 
 ```bash
-cd envs/prod # now everything you do will affect the production environment!
+AWS_PROFILE=<name> ./scripts/nomad_tls_setup.sh envs/prod/nomad_tls us-east-2 # generation
+
+# Also generate consul gossip key
+consul keygen
 ```
 
-## Additional Scripts and Operations
+```bash
+AWS_PROFILE=<name> terraform -chdir=envs/prod destroy
+```
 
-### Nomad Initialization
+Notes:
 
-The `scripts/nomad_tls_setup.sh` script is provided to generate and deploy TLS certificates required for secure internal communication across the Nomad servers and clients. Run this script as needed prior to applying your Node constraints if you're rotating keys, or during initial server bootstrap.
+- If module sources changed, run `init -reconfigure`.
+- There is no DynamoDB state lock, so avoid concurrent applies.
 
-## AWS CLI commands
+## What happens on EC2 bootstrap
 
-Some other useful aws commands to run locally are:
+The compute module user data does all of the following:
+
+- Installs Docker, Nomad, Consul, CNI plugins, and AWS tooling.
+- Pulls Consul encryption key from SSM and starts Consul.
+- Pulls Nomad TLS material from SSM and starts Nomad with TLS + ACL enabled.
+- On Nomad server nodes, bootstraps ACLs and writes `/nomad/root_token` and `/nomad/NOMAD_TOKEN` into SSM.
+- Optionally runs NGINX + Certbot HTTPS setup when `nginx_enabled=true` (enabled on core node in prod).
+- Starts Datadog agent in Docker.
+
+## DNS and HTTPS notes
+
+- Public DNS and private DNS are managed by the same reusable DNS module.
+- Public records include `core.<public_domain_name>` and dynamic client records (`s1`, `s2`, ...).
+- HTTP security group allows both `80` and `443`.
+- NGINX/Certbot on the core node expects DNS for `core.<public_domain_name>` to resolve to the core node EIP.
+
+## 5. Useful operational commands
 
 ```bash
 # Get the latests SSM commands that runned
@@ -90,4 +112,16 @@ aws ssm describe-instance-information --region <region> --query "InstanceInforma
 aws ssm list-command-invocations \
     --command-id <id> \
     --details --profile <name>
+
+# Nomad token generated at runtime
+aws ssm get-parameter \
+    --name /nomad/NOMAD_TOKEN \
+    --with-decryption \
+    --query Parameter.Value \
+    --output text \
+    --region us-east-2 \
+    --profile <name>
+
+# HTTPS smoke test
+curl -I https://core.feedtherealm.world
 ```
