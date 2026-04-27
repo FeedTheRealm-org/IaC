@@ -21,7 +21,6 @@ public_apex_ipv4        = "216.198.79.1"
 public_www_cname_target = "7199996a935df1e3.vercel-dns-017.com."
 public_dns_ttl          = 300
 nomad_cert_path         = "/etc/nomad.d/tls/ca.pem"
-ftr_core_service_url    = "core.feedtherealm.world"
 ami                     = "ami-0b0b78dcacbab728f" # Amazon Linux 2023 with kernel 6.1, 2024-06-01.
 vpc_id                  = "vpc-040aac61ba7d0c39b"
 

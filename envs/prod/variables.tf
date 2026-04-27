@@ -66,15 +66,21 @@ variable "stripe_api_key" {
   sensitive = true
 }
 
-variable "stripe_webhook_secret" {
+variable "stripe_gems_webhook_secret" {
+  type      = string
+  sensitive = true
+}
+
+variable "stripe_subscriptions_webhook_secret" {
   type      = string
   sensitive = true
 }
 
 /* FTR-SERVER Parameters */
 
-variable "ftr_core_service_url" {
-  type = string
+variable "mongo_connection_string" {
+  type      = string
+  sensitive = true
 }
 
 /* MONITORING Parameters */

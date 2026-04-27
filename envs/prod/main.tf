@@ -162,9 +162,9 @@ module "core_nomad_server" {
   aws_region   = var.aws_region
   ecr_registry = split("/", module.core_service_ecr.repository_url)[0]
 
-  nginx_enabled = true
-  nginx_domain  = "core.${var.public_domain_name}"
-  nginx_email   = var.email_sender_address
+  nginx_enabled       = true
+  nginx_domain        = "core.${var.public_domain_name}"
+  nginx_email         = var.email_sender_address
   nginx_upstream_host = "core-service.internal"
   nginx_upstream_port = 34782
 
@@ -186,7 +186,7 @@ module "nomad_clients" {
 
   source = "../../modules/compute"
 
-  depends_on = [module.monitoring_params, module.core_nomad_server]
+  depends_on = [module.monitoring_params, module.core_nomad_server, module.ftr_server_params]
 
   ami                   = var.ami
   instance_type         = each.value.instance_type
@@ -361,8 +361,13 @@ module "core_service_params" {
       type  = "SecureString"
     }
 
-    "/core-service/STRIPE_WEBHOOK_SECRET" = {
-      value = var.stripe_webhook_secret
+    "/core-service/STRIPE_GEMS_WEBHOOK_SECRET" = {
+      value = var.stripe_gems_webhook_secret
+      type  = "SecureString"
+    }
+
+    "/core-service/STRIPE_SUBSCRIPTIONS_WEBHOOK_SECRET" = {
+      value = var.stripe_subscriptions_webhook_secret
       type  = "SecureString"
     }
   }
@@ -372,9 +377,14 @@ module "ftr_server_params" {
   source = "../../modules/parameter_store/ssm_parameters"
 
   parameters = {
-    "/ftr-server/CORE_SERVICE_URL" = {
-      value = var.ftr_core_service_url
-      type  = "String"
+    "/ftr-server/SERVER_FIXED_TOKEN" = {
+      value = var.server_fixed_token
+      type  = "SecureString"
+    }
+
+    "/ftr-server/MONGO_CONNECTION_STRING" = {
+      value = var.mongo_connection_string
+      type  = "SecureString"
     }
   }
 }
