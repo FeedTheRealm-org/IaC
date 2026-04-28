@@ -31,6 +31,15 @@ nginx -t && systemctl enable nginx && systemctl restart nginx
 # Obtain TLS cert (configures 443 + certs and auto-renewal)
 # ============================================================
 
+for i in $(seq 1 24); do
+  RESOLVED=$(dig +short ${domain} @8.8.8.8 | tail -1)
+  if [ "$RESOLVED" = "$PUBLIC_IP" ]; then
+    break
+  fi
+  echo "Attempt $i/24: got '$RESOLVED', expected '$PUBLIC_IP', retrying in 10s..."
+  sleep 5
+done
+
 certbot --nginx \
   --non-interactive \
   --agree-tos \
