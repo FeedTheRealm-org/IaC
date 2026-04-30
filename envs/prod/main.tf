@@ -29,6 +29,28 @@ locals {
         ttl     = var.public_dns_ttl
         records = [module.core_nomad_server_eip.public_ip]
       }
+
+      # Brevo authentication
+      "@-brevo-txt" = {
+        type    = "TXT"
+        ttl     = 300
+        records = [var.brevo_code_value]
+      }
+      "brevo1._domainkey" = {
+        type    = "CNAME"
+        ttl     = 300
+        records = [var.brevo_dkim_1]
+      }
+      "brevo2._domainkey" = {
+        type    = "CNAME"
+        ttl     = 300
+        records = [var.brevo_dkim_2]
+      }
+      "_dmarc" = {
+        type    = "TXT"
+        ttl     = 300
+        records = [var.brevo_dmarc_value]
+      }
     },
     local.public_client_dns_records
   )

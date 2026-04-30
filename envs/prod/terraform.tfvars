@@ -13,7 +13,12 @@ buckets = {
 # Non-secret parameters
 environment             = "production"
 db_should_migrate       = "true"
+
 email_sender_address    = "atusgames.official@gmail.com"
+brevo_dkim_1 = "b1.feedtherealm-world.dkim.brevo.com"
+brevo_dkim_2 = "b2.feedtherealm-world.dkim.brevo.com"
+brevo_dmarc_value = "v=DMARC1; p=none; rua=mailto:rua@dmarc.brevo.com"
+
 session_token_duration  = "24h"
 email_logo_url          = "https://avatars.githubusercontent.com/u/231922724?s=400"
 stripe_real_prices      = "false"

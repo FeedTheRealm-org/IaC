@@ -37,6 +37,23 @@ variable "brevo_api_key" {
   sensitive = true
 }
 
+variable "brevo_code_value" {
+  type      = string
+  sensitive = true
+}
+
+variable "brevo_dkim_1" {
+  type      = string
+}
+
+variable "brevo_dkim_2" {
+  type      = string
+}
+
+variable "brevo_dmarc_value" {
+  type      = string
+}
+
 variable "server_fixed_token" {
   type      = string
   sensitive = true

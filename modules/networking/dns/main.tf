@@ -14,7 +14,7 @@ resource "aws_route53_record" "this" {
 
   zone_id = aws_route53_zone.this.zone_id
 
-  name = each.key == "@" ? var.zone_name : "${each.key}.${var.zone_name}"
+  name = startswith(each.key, "@") ? var.zone_name : "${each.key}.${var.zone_name}"
 
   type    = each.value.type
   ttl     = each.value.ttl
