@@ -370,6 +370,11 @@ module "core_service_params" {
       value = var.stripe_subscriptions_webhook_secret
       type  = "SecureString"
     }
+
+    "/core-service/STRIPE_REAL_PRICES" = {
+      value = var.stripe_real_prices
+      type  = "String"
+    }
   }
 }
 

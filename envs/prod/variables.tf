@@ -76,6 +76,10 @@ variable "stripe_subscriptions_webhook_secret" {
   sensitive = true
 }
 
+variable "stripe_real_prices" {
+  type = string
+}
+
 /* FTR-SERVER Parameters */
 
 variable "mongo_connection_string" {
