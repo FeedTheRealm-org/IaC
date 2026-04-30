@@ -186,7 +186,7 @@ module "core_nomad_server" {
 
   nginx_enabled       = true
   nginx_domain        = "core.${var.public_domain_name}"
-  nginx_email         = var.email_sender_address
+  nginx_email         = var.email_receiver_address
   nginx_upstream_host = "core-service.internal"
   nginx_upstream_port = 34782
 

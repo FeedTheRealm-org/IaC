@@ -20,6 +20,10 @@ variable "db_should_migrate" {
   type = string
 }
 
+variable "email_receiver_address" {
+  type = string
+}
+
 variable "email_sender_address" {
   type = string
 }
@@ -43,15 +47,15 @@ variable "brevo_code_value" {
 }
 
 variable "brevo_dkim_1" {
-  type      = string
+  type = string
 }
 
 variable "brevo_dkim_2" {
-  type      = string
+  type = string
 }
 
 variable "brevo_dmarc_value" {
-  type      = string
+  type = string
 }
 
 variable "server_fixed_token" {
