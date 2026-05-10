@@ -28,10 +28,6 @@ variable "email_sender_address" {
   type = string
 }
 
-variable "session_token_duration" {
-  type = string
-}
-
 variable "email_logo_url" {
   type = string
 }
@@ -63,7 +59,12 @@ variable "server_fixed_token" {
   sensitive = true
 }
 
-variable "session_token_secret_key" {
+variable "session_access_token_secret_key" {
+  type      = string
+  sensitive = true
+}
+
+variable "session_refresh_token_secret_key" {
   type      = string
   sensitive = true
 }

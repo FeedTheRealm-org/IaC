@@ -323,11 +323,6 @@ module "core_service_params" {
       type  = "String"
     }
 
-    "/core-service/SESSION_TOKEN_DURATION" = {
-      value = var.session_token_duration
-      type  = "String"
-    }
-
     "/core-service/EMAIL_LOGO_URL" = {
       value = var.email_logo_url
       type  = "String"
@@ -338,13 +333,18 @@ module "core_service_params" {
       type  = "SecureString"
     }
 
-    "/core-service/SERVER_FIXED_TOKEN" = {
-      value = var.server_fixed_token
+    "/core-service/SESSION_ACCESS_TOKEN_SECRET_KEY" = {
+      value = var.session_access_token_secret_key
       type  = "SecureString"
     }
 
-    "/core-service/SESSION_TOKEN_SECRET_KEY" = {
-      value = var.session_token_secret_key
+    "/core-service/SESSION_REFRESH_TOKEN_SECRET_KEY" = {
+      value = var.session_refresh_token_secret_key
+      type  = "SecureString"
+    }
+
+    "/core-service/SERVER_FIXED_TOKEN" = {
+      value = var.server_fixed_token
       type  = "SecureString"
     }
 
