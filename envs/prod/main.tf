@@ -24,6 +24,11 @@ locals {
         ttl     = var.public_dns_ttl
         records = [var.public_www_cname_target]
       }
+      "admin" = {
+        type    = "CNAME"
+        ttl     = var.public_dns_ttl
+        records = [var.public_admin_cname_target]
+      }
       "core" = {
         type    = "A"
         ttl     = var.public_dns_ttl

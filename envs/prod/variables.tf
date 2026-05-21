@@ -178,6 +178,11 @@ variable "public_www_cname_target" {
   type        = string
 }
 
+variable "public_admin_cname_target" {
+  description = "CNAME target used for the admin subdomain"
+  type        = string
+}
+
 variable "public_dns_ttl" {
   description = "TTL for managed public DNS records"
   type        = number

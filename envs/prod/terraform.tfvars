@@ -20,15 +20,16 @@ brevo_dkim_1           = "b1.feedtherealm-world.dkim.brevo.com"
 brevo_dkim_2           = "b2.feedtherealm-world.dkim.brevo.com"
 brevo_dmarc_value      = "v=DMARC1; p=none; rua=mailto:rua@dmarc.brevo.com"
 
-email_logo_url          = "https://avatars.githubusercontent.com/u/231922724?s=400"
-stripe_real_prices      = "false"
-public_domain_name      = "feedtherealm.world"
-public_apex_ipv4        = "216.198.79.1"
-public_www_cname_target = "7199996a935df1e3.vercel-dns-017.com."
-public_dns_ttl          = 300
-nomad_cert_path         = "/etc/nomad.d/tls/ca.pem"
-ami                     = "ami-0b0b78dcacbab728f" # Amazon Linux 2023 with kernel 6.1, 2024-06-01.
-vpc_id                  = "vpc-040aac61ba7d0c39b"
+email_logo_url            = "https://avatars.githubusercontent.com/u/231922724?s=400"
+stripe_real_prices        = "false"
+public_domain_name        = "feedtherealm.world"
+public_apex_ipv4          = "216.198.79.1"
+public_www_cname_target   = "7199996a935df1e3.vercel-dns-017.com."
+public_admin_cname_target = "b6a01535321a2d1b.vercel-dns-017.com."
+public_dns_ttl            = 300
+nomad_cert_path           = "/etc/nomad.d/tls/ca.pem"
+ami                       = "ami-0b0b78dcacbab728f" # Amazon Linux 2023 with kernel 6.1, 2024-06-01.
+vpc_id                    = "vpc-040aac61ba7d0c39b"
 
 # Nomad cluster topology defaults
 aws_region                      = "us-east-2"
