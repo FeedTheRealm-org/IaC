@@ -15,9 +15,6 @@ server {
     server_name $DOMAIN;
 
     location = /exports/zip {
-        limit_except PUT {
-            deny all;
-        }
         client_max_body_size 500M;
         
         proxy_pass http://$UPSTREAM;
