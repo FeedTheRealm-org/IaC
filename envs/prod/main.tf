@@ -338,6 +338,11 @@ module "core_service_params" {
       type  = "SecureString"
     }
 
+    "/core-service/CORS_ALLOWED_ORIGINS" = {
+      value = var.cors_allowed_origins
+      type  = "String"
+    }
+
     "/core-service/SESSION_ACCESS_TOKEN_SECRET_KEY" = {
       value = var.session_access_token_secret_key
       type  = "SecureString"

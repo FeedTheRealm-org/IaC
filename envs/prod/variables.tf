@@ -54,6 +54,10 @@ variable "brevo_dmarc_value" {
   type = string
 }
 
+variable "cors_allowed_origins" {
+  type = string
+}
+
 variable "server_fixed_token" {
   type      = string
   sensitive = true
