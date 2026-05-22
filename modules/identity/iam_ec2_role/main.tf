@@ -67,6 +67,7 @@ resource "aws_iam_role_policy" "s3_upload" {
 
       Action = [
         "s3:PutObject",
+        "s3:DeleteObject",
         "s3:AbortMultipartUpload"
       ]
 
