@@ -32,6 +32,7 @@ the state changes. Additionally there is a `backend.tf` file which declares wher
 │   ├── networking/           # DNS, Security Groups, Firewalls
 │   └── parameter_store/      # SSM / Configuration parameters
 ├── scripts/                  # Setup / Configuration bash scripts
+│   └── nomad_tls_setup.sh    # TLS certificate setup for Nomad cluster nodes
 └── README.md
 ```
 
