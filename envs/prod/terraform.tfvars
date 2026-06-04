@@ -41,6 +41,11 @@ nomad_client_nodes = {
     instance_type           = "t3.small"
     enable_udp_game_traffic = true
   }
+  nomad-client-b = {
+    name                    = "nomad-client-b"
+    instance_type           = "t3.small"
+    enable_udp_game_traffic = true
+  }
 }
 nomad_version  = "1.11.3"
 consul_version = "1.20.1"
